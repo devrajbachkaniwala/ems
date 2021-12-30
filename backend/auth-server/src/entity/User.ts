@@ -12,10 +12,7 @@ export class User extends BaseEntity {
     userPhoto: string;
 
     @Column({ type: 'varchar', length: 255 })
-    firstname: string;
-
-    @Column({ type: 'varchar', length: 255 })
-    lastname: string;
+    fullName: string;
 
     @Column({ type: 'varchar', length: 255, unique: true })
     email: string;
@@ -29,9 +26,9 @@ export class User extends BaseEntity {
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+    @UpdateDateColumn({ type: 'timestamptz' })
+    modifiedAt: Date;
 }

@@ -4,8 +4,7 @@ CREATE TABLE Users (
     userId VARCHAR(255),
     username VARCHAR(150) NOT NULL,
     userPhoto BYTEA,
-    firstname VARCHAR(255) NOT NULL,
-    lastname VARCHAR(255) NOT NULL,
+    fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(10) DEFAULT 'user',
@@ -37,6 +36,7 @@ CREATE TABLE Events (
     state VARCHAR(200) NOT NULL,
     country VARCHAR(200) NOT NULL,
     venue VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
     geoLatLng POINT NOT NULL,
     createdAt TIMESTAMPTZ DEFAULT NOW(),
     modifiedAt TIMESTAMPTZ DEFAULT NOW(),
@@ -167,3 +167,6 @@ AFTER INSERT
 ON BOOKINGITEMS
 FOR EACH ROW
 EXECUTE FUNCTION sold_ticket();
+
+/* Creating indexes */
+
