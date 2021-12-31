@@ -139,9 +139,9 @@ ADD CONSTRAINT FK_ORGANINZATIONTEAMMEMBERS_USERS FOREIGN KEY (userId) REFERENCES
 ADD CONSTRAINT FK_ORGANINZATIONTEAMMEMBERS_ORGANIZATIONS FOREIGN KEY (orgId) REFERENCES Organizations(orgId) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
-/* Trigger for updating sold ticket column in event prices table */
+/* Trigger for adding sold ticket in event prices table */
 
-CREATE OR REPLACE FUNCTION sold_ticket()
+CREATE OR REPLACE FUNCTION add_sold_ticket()
 RETURNS TRIGGER
 LANGUAGE PLPGSQL
 AS $$
@@ -162,11 +162,55 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER UPDATESOLD
+CREATE TRIGGER ADDSOLDTICKET
 AFTER INSERT
 ON BOOKINGITEMS
 FOR EACH ROW
-EXECUTE FUNCTION sold_ticket();
+EXECUTE FUNCTION add_sold_ticket();
+
+/* Trigger for updating sold tickets when user cancel's their booked events */
+
+CREATE OR REPLACE FUNCTION cancel_sold_ticket()
+RETURNS TRIGGER
+LANGUAGE PLPGSQL
+AS $$
+DECLARE
+    soldTicket INTEGER;
+    totalSold INTEGER;
+BEGIN
+    SELECT EventPrices.sold INTO soldTicket 
+    FROM EventPrices 
+    WHERE EventPrices.priceId = OLD.priceId;
+
+
+    totalSold = soldTicket - OLD.qty;
+
+    UPDATE EventPrices SET sold = totalSold WHERE priceId = OLD.priceId;
+
+    RETURN OLD;
+
+END;
+$$;
+
+CREATE TRIGGER CANCELSOLDTICKET
+BEFORE DELETE
+ON BOOKINGITEMS
+FOR EACH ROW
+EXECUTE FUNCTION cancel_sold_ticket();
 
 /* Creating indexes */
 
+CREATE INDEX Users_Idx
+ON Users ("createdAt" DESC);
+
+CREATE INDEX Events_Idx 
+ON Events ("category", "createdAt" DESC);
+
+CREATE INDEX Events_GeoLocation_Idx
+ON Events USING GiST("geoLatLng");
+
+CREATE INDEX EventPrices_Idx
+ON EventPrices ("sold" DESC);
+
+CREATE INDEX Bookings_Idx
+ON Bookings ("createdAt" DESC);
