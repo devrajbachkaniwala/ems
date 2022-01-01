@@ -6,14 +6,17 @@ import { buildSchema } from 'type-graphql';
 import { GraphQLSchema } from 'graphql';
 import { config } from 'dotenv';
 import { EventResolver } from './resolvers/Event';
+import { UserResolver } from './resolvers/User';
+import { customAuthChecker } from './middleware/authChecker';
+import { OrganizationTeamMemberResolver } from './resolvers/OrganizationTeamMember';
 
 config();
 
 (async (): Promise<void> => {
     const connection: Connection = await createConnection();
-    const schema: GraphQLSchema = await buildSchema({ resolvers: [ EventResolver ] });
+    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationTeamMemberResolver ], authChecker: customAuthChecker });
     
-    const apolloServer: ApolloServer = new ApolloServer({ schema });
+    const apolloServer = new ApolloServer({ schema, context: ({ req }: any) => ({ req }) });
     
     const app: Express = express();
 
