@@ -1,7 +1,8 @@
 import { MiddlewareFn, NextFn, ResolverData } from "type-graphql";
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { IContext } from "../interface/IContext";
 
-export const verifyToken: MiddlewareFn<{ req: any }> = async ({ context }: ResolverData<{ req: any }>, next: NextFn): Promise<any> => {
+export const verifyToken: MiddlewareFn<IContext> = async ({ context }: ResolverData<IContext>, next: NextFn): Promise<any> => {
     
     const authHeader: string | undefined = context.req.headers.authorization;
     const token: string | undefined = authHeader && authHeader.split(' ')[1];

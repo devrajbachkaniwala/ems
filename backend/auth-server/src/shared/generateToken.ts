@@ -11,6 +11,6 @@ export const generateToken = (payload: IPayload): string => {
     const ACCESS_TOKEN_SECRET_KEY = process.env.ACCESS_TOKEN_SECRET_KEY || '';
 
     // Get jwt access token by signing it with payload and access token secret key
-    const token: string = jwt.sign(payload, ACCESS_TOKEN_SECRET_KEY, { expiresIn: '30s' });
+    const token: string = jwt.sign(payload, ACCESS_TOKEN_SECRET_KEY, { expiresIn: '15m' });
     return token;
 }

@@ -20,7 +20,7 @@ export class User extends BaseEntity {
     @Column({ type: 'varchar', length: 255 })
     password: string;
 
-    @Column({ type: 'varchar', length: 10, default: 'user' })
+    @Column({ type: 'varchar', length: 20, default: 'user' })
     role: 'user' | 'admin' | 'organization';
 
     @Column({ type: 'boolean', default: true })

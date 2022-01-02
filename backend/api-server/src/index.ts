@@ -9,12 +9,13 @@ import { EventResolver } from './resolvers/Event';
 import { UserResolver } from './resolvers/User';
 import { customAuthChecker } from './middleware/authChecker';
 import { OrganizationTeamMemberResolver } from './resolvers/OrganizationTeamMember';
+import { OrganizationResolver } from './resolvers/Organization';
 
 config();
 
 (async (): Promise<void> => {
     const connection: Connection = await createConnection();
-    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationTeamMemberResolver ], authChecker: customAuthChecker });
+    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationResolver, OrganizationTeamMemberResolver ], authChecker: customAuthChecker });
     
     const apolloServer = new ApolloServer({ schema, context: ({ req }: any) => ({ req }) });
     

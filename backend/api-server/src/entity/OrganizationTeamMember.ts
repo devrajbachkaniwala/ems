@@ -7,16 +7,16 @@ import { User } from "./User";
 @Entity({ name: 'organizationteammembers' })
 export class OrganizationTeamMember extends BaseEntity {
 
-    @Field(() => ID)
+    @Field(type => ID)
     @PrimaryGeneratedColumn({ type: 'int' })
     id: number;
     
-    //@Field(() => Organization)
+    //@Field(type => Organization)
     @ManyToOne(() => Organization, organization => organization.organizationTeamMembers, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
     @JoinColumn({ name: 'orgId' })
     organization: Organization;
 
-    @Field(() => User)
+    @Field(type => User, { nullable: true })
     @OneToOne(() => User, user => user.organizationTeamMember, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
     @JoinColumn()
     user: User;

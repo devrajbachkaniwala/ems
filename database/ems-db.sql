@@ -7,7 +7,7 @@ CREATE TABLE Users (
     fullName VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role VARCHAR(10) DEFAULT 'user',
+    role VARCHAR(20) DEFAULT 'user',
     isActive BOOLEAN DEFAULT TRUE,
     createdAt TIMESTAMPTZ DEFAULT NOW(),
     modifiedAt TIMESTAMPTZ DEFAULT NOW(),

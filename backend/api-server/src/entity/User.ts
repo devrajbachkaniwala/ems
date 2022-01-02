@@ -7,42 +7,42 @@ import { Review } from './Review';
 @ObjectType()
 @Entity({ name: 'users' })
 export class User extends BaseEntity {
-    @Field(() => ID)
+    @Field(type => ID)
     @PrimaryGeneratedColumn({ type: 'int' })
     id: number;
 
-    @Field(() => String)
+    @Field(type => String)
     @Column({ type: 'varchar', length: 150 })
     username: string;
     
-    @Field(() => String, { nullable: true })
+    //@Field(type => String, { nullable: true })
     @Column({ type: 'bytea', nullable: true })
     userPhoto: string;
 
-    @Field(() => String)
+    @Field(type => String)
     @Column({ type: 'varchar', length: 255 })
     fullName: string;
 
-    @Field(() => String)
+    @Field(type => String)
     @Column({ type: 'varchar', length: 255, unique: true })
     email: string;
 
     @Column({ type: 'varchar', length: 255 })
     password: string;
 
-    @Field(() => String)
-    @Column({ type: 'varchar', length: 10, default: 'user' })
+    @Field(type => String)
+    @Column({ type: 'varchar', length: 20, default: 'user' })
     role: 'user' | 'admin' | 'organization';
 
-    @Field(() => Boolean)
+    @Field(type => Boolean)
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
 
-    @Field(() => Date)
+    @Field(type => Date)
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @Field(() => Date)
+    @Field(type => Date)
     @UpdateDateColumn({ type: 'timestamptz' })
     modifiedAt: Date;
 
