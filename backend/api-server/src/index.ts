@@ -8,16 +8,17 @@ import { config } from 'dotenv';
 import { EventResolver } from './resolvers/Event';
 import { UserResolver } from './resolvers/User';
 import { customAuthChecker } from './middleware/authChecker';
-import { OrganizationTeamMemberResolver } from './resolvers/OrganizationTeamMember';
 import { OrganizationResolver } from './resolvers/Organization';
+import { EventPhotoResolver } from './resolvers/EventPhoto';
+import { EventTimingResolver } from './resolvers/EventTiming';
 
 config();
 
 (async (): Promise<void> => {
     const connection: Connection = await createConnection();
-    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationResolver, OrganizationTeamMemberResolver ], authChecker: customAuthChecker });
+    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationResolver, EventResolver, EventPhotoResolver, EventTimingResolver ], authChecker: customAuthChecker });
     
-    const apolloServer = new ApolloServer({ schema, context: ({ req }: any) => ({ req }) });
+    const apolloServer = new ApolloServer({ schema, context: ({ req }: any) => ({ req }), formatError: (err) => err });
     
     const app: Express = express();
 
