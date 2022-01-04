@@ -7,6 +7,7 @@ import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 import { IContext } from "../interface/IContext";
 import { DeleteResult, Like } from "typeorm";
 import { ApolloError } from "apollo-server-express";
+import { Review } from "../entity/Review";
 
 config();
 
@@ -141,4 +142,14 @@ export class UserResolver {
         return orgTeamMember?.organization;
     }
 
+    @FieldResolver(type => [Review], { nullable: true })
+    async reviews(
+        @Root() parent: User
+    ): Promise<Review[] | undefined> {
+        try {
+            return await Review.find({ where: { user: { id: parent.id } }, relations: [ 'user', 'event' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
 }

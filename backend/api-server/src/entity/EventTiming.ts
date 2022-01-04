@@ -1,5 +1,6 @@
 import { Field, ID, ObjectType } from "type-graphql";
-import { BaseEntity, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BookingItem } from "./BookingItem";
 import { Event } from "./Event";
 
 @ObjectType()
@@ -25,4 +26,7 @@ export class EventTiming extends BaseEntity {
     @Field(type => Event)
     @ManyToOne(() => Event, event => event.timings, { nullable: false, onUpdate: 'CASCADE', onDelete: 'CASCADE' })
     event: Event;
+
+    @OneToMany(() => BookingItem, bookingItem => bookingItem.timing)
+    bookingItems: BookingItem[];
 }

@@ -25,12 +25,12 @@ export class OrganizationResolver {
         @Ctx() { req }: IContext
     ): Promise<Organization | undefined> {
         try {
-            const org: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ "user", "organization" ] });
-            if(!org) {
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ "user", "organization" ] });
+            if(!orgTeamMember) {
                 throw new ApolloError('Organization not found');
             }
             
-            return org.organization;
+            return orgTeamMember.organization;
         } catch(err: any) {
             if(err instanceof ApolloError) {
                 throw err;
@@ -87,7 +87,6 @@ export class OrganizationResolver {
     @Authorized('ORGANIZATION')
     async removeTeamMember(
         @Arg('email', type => String) email: string,
-        @Arg('orgId', type => ID) orgId: number,
         @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
@@ -104,11 +103,17 @@ export class OrganizationResolver {
             if(user.role !== 'organization') {
                 throw new ApolloError('User is not a part of an organization');
             }
-    
-            const organizationTeamMember: DeleteResult | undefined = await OrganizationTeamMember.delete({ user: { id: user.id } });
+
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user is not part of an organization');
+            }
+
+            const organizationTeamMember: DeleteResult | undefined = await OrganizationTeamMember.delete({ user: { id: user.id }, organization: { id: orgTeamMember.organization.id } });
             
             if(!organizationTeamMember.affected) {
-                throw new ApolloError('User already removed from an organization');
+                throw new ApolloError('User not found');
             }
     
             user.role = 'user';
@@ -175,7 +180,7 @@ export class OrganizationResolver {
             const org: DeleteResult = await Organization.delete({ id: orgTeamMember?.organization.id });
             
             if(!org.affected) {
-                throw new ApolloError('Organization is already deleted');
+                throw new ApolloError('Organization not found');
             }
             
             const user: User | undefined = await User.findOne(req.userId);

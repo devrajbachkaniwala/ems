@@ -3,9 +3,11 @@ import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Roo
 import { DeleteResult, Like } from "typeorm";
 import { Event } from "../entity/Event";
 import { EventPhoto } from "../entity/EventPhoto";
+import { EventPrice } from "../entity/EventPrice";
 import { EventTiming } from "../entity/EventTiming";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
+import { Review } from "../entity/Review";
 import { AddEventInput } from "../inputs/EventInput/AddEventInput";
 import { UpdateEventInput } from "../inputs/EventInput/UpdateEventInput";
 import { IContext } from "../interface/IContext";
@@ -164,4 +166,25 @@ export class EventResolver {
         }
     }
 
+    @FieldResolver(type => [EventPrice], { nullable: true })
+    async prices(
+        @Root() parent: Event
+    ): Promise<EventPrice[] | undefined> {
+        try {
+            return await EventPrice.find({ where: { event: { id: parent.id } }, relations: [ 'event' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+
+    @FieldResolver(type => [Review], { nullable: true })
+    async reviews(
+        @Root() parent: Event
+    ): Promise<Review[] | undefined> {
+        try {
+            return await Review.find({ where: { event: { id: parent.id } }, relations: [ 'event', 'user' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
 }

@@ -11,14 +11,24 @@ import { customAuthChecker } from './middleware/authChecker';
 import { OrganizationResolver } from './resolvers/Organization';
 import { EventPhotoResolver } from './resolvers/EventPhoto';
 import { EventTimingResolver } from './resolvers/EventTiming';
+import { EventPriceResolver } from './resolvers/EventPrice';
+import { ReviewResolver } from './resolvers/Review';
+import { BookingResolver } from './resolvers/Booking';
 
 config();
 
 (async (): Promise<void> => {
     const connection: Connection = await createConnection();
-    const schema: GraphQLSchema = await buildSchema({ resolvers: [ UserResolver, OrganizationResolver, EventResolver, EventPhotoResolver, EventTimingResolver ], authChecker: customAuthChecker });
+    const schema: GraphQLSchema = await buildSchema({ 
+        resolvers: [ UserResolver, OrganizationResolver, EventResolver, EventPhotoResolver, EventTimingResolver, EventPriceResolver, ReviewResolver, BookingResolver ], 
+        authChecker: customAuthChecker 
+    });
     
-    const apolloServer = new ApolloServer({ schema, context: ({ req }: any) => ({ req }), formatError: (err) => err });
+    const apolloServer = new ApolloServer({ 
+        schema, 
+        context: ({ req }: any) => ({ req }), 
+        formatError: (err) => err 
+    });
     
     const app: Express = express();
 
