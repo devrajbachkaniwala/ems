@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-express";
 import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
-import { DeleteResult, Like } from "typeorm";
+import { DeleteResult, ILike, Like } from "typeorm";
 import { Event } from "../entity/Event";
 import { EventPhoto } from "../entity/EventPhoto";
 import { EventPrice } from "../entity/EventPrice";
@@ -31,7 +31,7 @@ export class EventResolver {
     }
 
     @Query(type => Event, { nullable: true })
-    async eventById(@Arg('id', type => ID) eventId: number): Promise<Event | undefined> {
+    async eventById(@Arg('eventId', type => ID) eventId: number): Promise<Event | undefined> {
         try {
             return await Event.findOne({ where: { id: eventId }, relations: [ 'organization' ] });
         } catch(err: any) {
@@ -40,9 +40,18 @@ export class EventResolver {
     }
     
     @Query(type => [Event], { nullable: true })
-    async searchEventByName(@Arg('name', type => String) name: string): Promise<Event[] | undefined> {
+    async searchEventsByName(@Arg('name', type => String) name: string): Promise<Event[] | undefined> {
         try {
-            return await Event.find({ where: { name: Like(`%${name}%`) }, relations: [ 'organization' ] });
+            return await Event.find({ where: { name: ILike(`%${name}%`) }, relations: [ 'organization' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+    
+    @Query(type => [Event], { nullable: true })
+    async searchEventsByCategory(@Arg('category', type => String) category: string): Promise<Event[] | undefined> {
+        try {
+            return await Event.find({ where: { category: ILike(`%${category}%`) }, relations: [ 'organization' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -57,19 +66,21 @@ export class EventResolver {
     @Mutation(type => Event)
     @Authorized('ORGANIZATION')
     async createEvent(
-        @Arg('orgId', type => ID) orgId: number,
-        @Arg('data', type => AddEventInput) data: AddEventInput
-    ) {
+        @Arg('data', type => AddEventInput) data: AddEventInput,
+        @Ctx() { req }: IContext
+    ): Promise<Event | undefined> {
         try {
-            const organization: Organization | undefined = await Organization.findOne(orgId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const organization: Organization | undefined = await Organization.findOne({ where: { id: orgTeamMember.organization.id } });
             if(!organization) {
                 throw new ApolloError('Organization not found');
             }
     
-            const event: Event | undefined = await Event.create({ ...data, organization }).save();
-            if(!event) {
-                throw new ApolloError('Failed to create event');
-            }
+            const event: Event = await Event.create({ ...data, organization }).save();
         
             return event;
         } catch(err: any) {
@@ -82,11 +93,19 @@ export class EventResolver {
 
     @Mutation(type => Boolean)
     @Authorized('ORGANIZATION')
-    async deleteEvent(@Arg('id', type => ID) eventId: number): Promise<Boolean | undefined> {
+    async deleteEventById(
+        @Arg('eventId', type => ID) eventId: number,
+        @Ctx() { req }: IContext
+    ): Promise<Boolean | undefined> {
         try {
-            const event: DeleteResult | undefined = await Event.delete(eventId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const event: DeleteResult | undefined = await Event.delete({ id: eventId, organization: { id: orgTeamMember.organization.id } });
             if(!event.affected) {
-                throw new ApolloError('Event already deleted');
+                throw new ApolloError('Event not found');
             }
             return true;
         } catch(err: any) {
@@ -99,15 +118,21 @@ export class EventResolver {
 
     @Mutation(type => Event)
     @Authorized('ORGANIZATION')
-    async updateEvent(
-        @Arg('id', type => ID) eventId: number,
-        @Arg('data', type => UpdateEventInput) data: UpdateEventInput
+    async updateEventById(
+        @Arg('eventId', type => ID) eventId: number,
+        @Arg('data', type => UpdateEventInput) data: UpdateEventInput,
+        @Ctx() { req }: IContext
     ): Promise<Event | undefined> {
         try {
-            const event = await Event.findOne(eventId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
 
             if(!event) {
-                throw new ApolloError('Event not found');
+                throw new ApolloError('Event does not belong to the organization');
             }
 
             event.name = data.name || event.name;
@@ -117,7 +142,13 @@ export class EventResolver {
             event.country = data.country || event.country;
             event.venue = data.venue || event.venue;
             event.category = data.category || event.category;
-            event.geoLatLng = data.geoLatLng || event.geoLatLng;
+
+            if(!data.geoLatLng) {
+                const geoLocation: { x: number, y: number } = (event.geoLatLng as any);
+                event.geoLatLng = `(${geoLocation.x},${geoLocation.y})`;
+            } else {
+                event.geoLatLng = data.geoLatLng;
+            }
 
             await event.save();
             return event;

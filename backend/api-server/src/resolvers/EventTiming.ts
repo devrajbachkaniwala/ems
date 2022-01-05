@@ -30,10 +30,11 @@ export class EventTimingResolver {
    
     @Query(type => EventTiming, { nullable: true })
     async eventTimingById(
-        @Arg('timingId', type => ID) timingId: number
+        @Arg('timingId', type => ID) timingId: number,
+        @Arg('eventId', type => ID) eventId: number
     ): Promise<EventTiming | undefined> {
         try {
-            return await EventTiming.findOne({ where: { id: timingId } , relations: [ 'event' ] });
+            return await EventTiming.findOne({ where: { id: timingId, event: { id: eventId } } , relations: [ 'event' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -50,11 +51,16 @@ export class EventTimingResolver {
     @Authorized('ORGANIZATION')
     async addEventTimingByEventId(
         @Arg('eventId', type => ID) eventId: number,
-        @Arg('data', type => AddEventTimingInput) data: AddEventTimingInput
+        @Arg('data', type => AddEventTimingInput) data: AddEventTimingInput,
+        @Ctx() { req }: IContext
     ): Promise<EventTiming | undefined> {
         try {
-            const event: Event | undefined = await Event.findOne(eventId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: req.userId }, relations: [ 'organization', 'user' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
 
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
             if(!event) {
                 throw new ApolloError('Event not found');
             }
@@ -74,6 +80,7 @@ export class EventTimingResolver {
     async updateEventTimingById(
         @Arg('timingId', type => ID) timingId: number,
         @Arg('data', type => UpdateEventTimingInput) data: UpdateEventTimingInput,
+        @Arg('eventId', type => ID) eventId: number,
         @Ctx() { req }: IContext
     ): Promise<EventTiming | undefined> {
         try {
@@ -82,7 +89,7 @@ export class EventTimingResolver {
                 throw new ApolloError('Requested user is not a part of an organization');
             }
 
-            const event: Event | undefined = await Event.findOne({ where: { organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
 
             if(!event) {
                 throw new ApolloError('Event does not belong to the organization');
@@ -112,6 +119,7 @@ export class EventTimingResolver {
     @Authorized('ORGANIZATION')
     async removeEventTimingById(
         @Arg('timingId', type => ID) timingId: number,
+        @Arg('eventId', type => ID) eventId: number,
         @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
@@ -120,7 +128,7 @@ export class EventTimingResolver {
                 throw new ApolloError('Requested user is not a part of an organization');
             }
 
-            const event: Event | undefined = await Event.findOne({ where: { organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
 
             if(!event) {
                 throw new ApolloError('Event does not belong to the organization');

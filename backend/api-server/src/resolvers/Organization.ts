@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-express";
 import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
-import { DeleteResult } from "typeorm";
+import { DeleteResult, Not } from "typeorm";
 import { Event } from "../entity/Event";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
@@ -27,7 +27,7 @@ export class OrganizationResolver {
         try {
             const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ "user", "organization" ] });
             if(!orgTeamMember) {
-                throw new ApolloError('Organization not found');
+                throw new ApolloError('Requested user does not belong to the organization');
             }
             
             return orgTeamMember.organization;
@@ -39,36 +39,27 @@ export class OrganizationResolver {
         }
     }
 
-    // Add new member in organization
+    // Add new member in an organization
     @Mutation(type => OrganizationTeamMember)
     @Authorized('ORGANIZATION')
     async addTeamMember(
         @Arg('email', type => String) email: string,
-        @Arg('orgId', type => ID) orgId: number
+        @Ctx() { req }: IContext
     ): Promise<OrganizationTeamMember | undefined> {
         try {
-            const user: User | undefined = await User.findOne({ where: { email } });
+            const organizationTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            
+            if(!organizationTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const user: User | undefined = await User.findOne({ where: { email, role: Not('organization') } });
             
             if(!user) {
-                throw new ApolloError('User email not found');
-            }
-    
-            if(user.role === 'organization') {
-                throw new ApolloError('User is already a member of an organization');
-            }
-    
-            const teamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: user.id } } });
-            if(teamMember) {
-                throw new ApolloError('User already exists in organization team members');
+                throw new ApolloError('User is not a registered user or User is a part of another organization');
             }
             
-            const organization: Organization | undefined = await Organization.findOne(orgId);
-            
-            if(!organization) {
-                throw new ApolloError('Organization not found');
-            }
-            
-            const orgTeamMember: OrganizationTeamMember = await OrganizationTeamMember.create({ user, organization }).save();
+            const orgTeamMember: OrganizationTeamMember = await OrganizationTeamMember.create({ user, organization: organizationTeamMember.organization }).save();
     
             user.role = 'organization';
             await user.save();
@@ -82,7 +73,7 @@ export class OrganizationResolver {
         }
     }
 
-    // Remove member in organization
+    // Remove member from an organization
     @Mutation(type => Boolean)
     @Authorized('ORGANIZATION')
     async removeTeamMember(
@@ -90,32 +81,24 @@ export class OrganizationResolver {
         @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
-            const user: User | undefined = await User.findOne({ where: { email } });
-    
-            if(!user) {
-                throw new ApolloError('User email not found');
-            }
-            
-            if(req.userId === user.id) {
-                throw new ApolloError('Organization team member cannot remove themselves from team members');
-            }
-    
-            if(user.role !== 'organization') {
-                throw new ApolloError('User is not a part of an organization');
-            }
-
             const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
             
             if(!orgTeamMember) {
-                throw new ApolloError('Requested user is not part of an organization');
+                throw new ApolloError('Requested user does not belong to the organization');
             }
 
-            const organizationTeamMember: DeleteResult | undefined = await OrganizationTeamMember.delete({ user: { id: user.id }, organization: { id: orgTeamMember.organization.id } });
+            const user: User | undefined = await User.findOne({ where: { email, role: 'organization', id: Not(orgTeamMember.user.id), organizationTeamMember: { organization: { id: orgTeamMember.organization.id } } }, relations: [ 'organizationTeamMember', 'organizationTeamMember.organization' ] });
+            
+            if(!user) {
+                throw new ApolloError('User not found or User cannot remove themselves from team member');
+            }
+
+            const organizationTeamMember: DeleteResult | undefined = await OrganizationTeamMember.delete({ id: user.organizationTeamMember.id });
             
             if(!organizationTeamMember.affected) {
-                throw new ApolloError('User not found');
+                throw new ApolloError('User not found in team members of an organization');
             }
-    
+            
             user.role = 'user';
             await user.save();
         

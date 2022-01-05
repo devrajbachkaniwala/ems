@@ -1,10 +1,12 @@
 import { ApolloError } from "apollo-server-express";
-import { Arg, Authorized, ID, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Ctx, ID, Mutation, Query, Resolver } from "type-graphql";
 import { DeleteResult } from "typeorm";
 import { Event } from "../entity/Event";
 import { EventPrice } from "../entity/EventPrice";
+import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 import { AddEventPriceInput } from "../inputs/EventPriceInput/AddEventPriceInput";
 import { UpdateEventPriceInput } from "../inputs/EventPriceInput/UpdateEventPriceInput";
+import { IContext } from "../interface/IContext";
 
 @Resolver()
 export class EventPriceResolver {
@@ -27,10 +29,11 @@ export class EventPriceResolver {
 
     @Query(type => EventPrice, { nullable: true })
     async eventPriceById(
-        @Arg('priceId', type => ID) priceId: number
+        @Arg('priceId', type => ID) priceId: number,
+        @Arg('eventId', type => ID) eventId: number
     ): Promise<EventPrice | undefined> {
         try {
-            return await EventPrice.findOne({ where: { id: priceId } , relations: [ 'event' ] });
+            return await EventPrice.findOne({ where: { id: priceId, event: { id: eventId } } , relations: [ 'event' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -44,14 +47,20 @@ export class EventPriceResolver {
 
     @Mutation(type => EventPrice)
     @Authorized('ORGANIZATION')
-    async addPriceByEventId(
+    async addEventPriceByEventId(
         @Arg('eventId', type => ID) eventId: number,
-        @Arg('data', type => AddEventPriceInput) data: AddEventPriceInput
+        @Arg('data', type => AddEventPriceInput) data: AddEventPriceInput,
+        @Ctx() { req }: IContext
     ): Promise<EventPrice | undefined> {
         try {
-            const event: Event | undefined = await Event.findOne(eventId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
             if(!event) {
-                throw new ApolloError('Event not found');
+                throw new ApolloError('Event does not belong to the organization');
             }
             const eventPrice: EventPrice = await EventPrice.create({ ...data, event }).save();
             return eventPrice;
@@ -65,12 +74,24 @@ export class EventPriceResolver {
     
     @Mutation(type => EventPrice)
     @Authorized('ORGANIZATION')
-    async updatePriceById(
+    async updateEventPriceById(
         @Arg('priceId', type => ID) priceId: number,
-        @Arg('data', type => UpdateEventPriceInput) data: UpdateEventPriceInput
+        @Arg('data', type => UpdateEventPriceInput) data: UpdateEventPriceInput,
+        @Arg('eventId', type => ID) eventId: number,
+        @Ctx() { req }: IContext
     ): Promise<EventPrice | undefined> {
         try {
-            const eventPrice: EventPrice | undefined = await EventPrice.findOne(priceId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
+            if(!event) {
+                throw new ApolloError('Event does not belong to the organization');
+            }
+            
+            const eventPrice: EventPrice | undefined = await EventPrice.findOne({ where: { id: priceId, event: { id: event.id } }, relations: [ 'event' ] });
             if(!eventPrice) {
                 throw new ApolloError('Event price not found');
             }
@@ -91,13 +112,25 @@ export class EventPriceResolver {
     
     @Mutation(type => Boolean)
     @Authorized('ORGANIZATION')
-    async removePriceById(
-        @Arg('priceId', type => ID) priceId: number
+    async removeEventPriceById(
+        @Arg('priceId', type => ID) priceId: number,
+        @Arg('eventId', type => ID) eventId: number,
+        @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
-            const eventPrice: DeleteResult | undefined = await EventPrice.delete(priceId);
+            const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
+            if(!orgTeamMember) {
+                throw new ApolloError('Requested user does not belong to the organization');
+            }
+
+            const event: Event | undefined = await Event.findOne({ where: { id: eventId, organization: { id: orgTeamMember.organization.id } }, relations: [ 'organization' ] });
+            if(!event) {
+                throw new ApolloError('Event does not belong to the organization');
+            }
+
+            const eventPrice: DeleteResult | undefined = await EventPrice.delete({ id: priceId, event: { id: event.id } });
             if(!eventPrice.affected) {
-                throw new ApolloError('Event price already deleted');
+                throw new ApolloError('Event price not found');
             }
             return true;
         } catch(err: any) {

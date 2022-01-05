@@ -5,7 +5,7 @@ import { UserInput } from "../inputs/UserInput";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 import { IContext } from "../interface/IContext";
-import { DeleteResult, Like } from "typeorm";
+import { DeleteResult, ILike, Like } from "typeorm";
 import { ApolloError } from "apollo-server-express";
 import { Review } from "../entity/Review";
 
@@ -36,7 +36,7 @@ export class UserResolver {
     @Authorized('ADMIN')
     async searchUserByName(@Arg('name', type => String) name: string): Promise<User[] | undefined> {
         try {
-            return await User.find({ fullName: Like(`%${name}%`) });
+            return await User.find({ fullName: ILike(`%${name}%`) });
         } catch(err: any) {
             console.log(err);
         }
@@ -68,7 +68,7 @@ export class UserResolver {
         try {
             const user: DeleteResult | undefined = await User.delete(userId);
             if(!user.affected) {
-                throw new ApolloError('User already deleted');
+                throw new ApolloError('User not found');
             }
             
             return true;

@@ -5,7 +5,7 @@
     "username": "postgres",
     "password": "password",
     "database": "ems_db",
-    "synchronize": true,
+    "synchronize": false,
     "logging": false,
     "entities": [
        "src/entity/**/*.ts"
