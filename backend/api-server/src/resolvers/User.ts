@@ -159,7 +159,7 @@ export class UserResolver {
         @Root() parent: User
     ): Promise<Booking[] | undefined> {
         try {
-            return await Booking.find({ where: { user: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ] });
+            return await Booking.find({ where: { user: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ], order: { createdAt: 'DESC' } });
         } catch(err: any) {
             console.log(err);
         }

@@ -25,7 +25,7 @@ export class EventResolver {
     @Query(type => [Event], { nullable: true })
     async events(): Promise<Event[] | undefined> {
         try {
-            return await Event.find({ relations: [ 'organization' ] });
+            return await Event.find({ relations: [ 'organization' ], order: { createdAt: 'DESC' } });
         } catch(err: any) {
             console.log(err);
         }
@@ -53,6 +53,28 @@ export class EventResolver {
     async searchEventsByCategory(@Arg('category', type => String) category: string): Promise<Event[] | undefined> {
         try {
             return await Event.find({ where: { category: ILike(`%${category}%`) }, relations: [ 'organization' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+
+    @Query(type => [Event], { nullable: true })
+    async trendingEvents(): Promise<Event[] | undefined> {
+        try {
+            const eventPrice: EventPrice[] | undefined = await EventPrice.find({ relations: [ 'event' ], order: { sold: 'DESC' } });
+            const events: Event[] = eventPrice.map( price => price.event );
+            return events;
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+
+    @Query(type => [Event], { nullable: true })
+    async eventsByLocation(
+        @Arg('geoLatLng', type => String) geoLatLng: string
+    ): Promise<Event[] | undefined> {
+        try {
+            return await Event.find({ where: { geoLatLng }, relations: [ 'organization' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -225,7 +247,7 @@ export class EventResolver {
         @Root() parent: Event
     ): Promise<Booking[] | undefined> {
         try {
-            return await Booking.find({ where: { event: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ] });
+            return await Booking.find({ where: { event: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ], order: { createdAt: 'DESC' } });
         } catch(err: any) {
             console.log(err);
         }

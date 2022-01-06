@@ -26,7 +26,7 @@ export class BookingResolver {
         @Ctx() { req }: IContext
     ): Promise<Booking[] | undefined> {
         try {
-            return await Booking.find({ where: { user: { id: req.userId } }, relations: [ 'user', 'event', 'bookingItem' ] });
+            return await Booking.find({ where: { user: { id: req.userId } }, relations: [ 'user', 'event', 'bookingItem' ], order: { createdAt: 'DESC' } });
         } catch(err: any) {
             console.log(err);
         }
