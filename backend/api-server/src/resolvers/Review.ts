@@ -80,10 +80,11 @@ export class ReviewResolver {
     async updateReviewById(
         @Arg('reviewId', type => ID) reviewId: number,
         @Arg('data', type => UpdateReviewInput) data: UpdateReviewInput,
+        @Arg('eventId', type => ID) eventId: number,
         @Ctx() { req }: IContext
     ): Promise<Review | undefined> {
         try {
-            const review: Review | undefined = await Review.findOne({ where: { id: reviewId, user: { id: req.userId } }, relations: [ 'user', 'event' ] });
+            const review: Review | undefined = await Review.findOne({ where: { id: reviewId, user: { id: req.userId }, event: { id: eventId } }, relations: [ 'user', 'event' ] });
             if(!review) {
                 throw new ApolloError('Review not found');
             }
@@ -105,10 +106,11 @@ export class ReviewResolver {
     @Authorized('USER')
     async removeReviewById(
         @Arg('reviewId', type => ID) reviewId: number,
+        @Arg('eventId', type => ID) eventId: number,
         @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
-            const review: DeleteResult | undefined = await Review.delete({ id: reviewId, user: { id: req.userId } });
+            const review: DeleteResult | undefined = await Review.delete({ id: reviewId, user: { id: req.userId }, event: { id: eventId } });
             
             if(!review.affected) {
                 throw new ApolloError('Review not found');

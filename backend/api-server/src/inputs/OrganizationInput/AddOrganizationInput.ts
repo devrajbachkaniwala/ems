@@ -9,8 +9,8 @@ export class AddOrganizationInput {
     @Field(type => String)
     description: string;
 
-    @Field(type => Int)
-    contactNo: number;
+    @Field(type => String)
+    contactNo: string;
 
     @Field(type => String)
     email: string;

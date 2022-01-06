@@ -1,6 +1,7 @@
 import { ApolloError } from "apollo-server-express";
 import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
 import { DeleteResult, ILike, Like } from "typeorm";
+import { Booking } from "../entity/Booking";
 import { Event } from "../entity/Event";
 import { EventPhoto } from "../entity/EventPhoto";
 import { EventPrice } from "../entity/EventPrice";
@@ -214,6 +215,17 @@ export class EventResolver {
     ): Promise<Review[] | undefined> {
         try {
             return await Review.find({ where: { event: { id: parent.id } }, relations: [ 'event', 'user' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+    
+    @FieldResolver(type => [Booking], { nullable: true })
+    async bookings(
+        @Root() parent: Event
+    ): Promise<Booking[] | undefined> {
+        try {
+            return await Booking.find({ where: { event: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ] });
         } catch(err: any) {
             console.log(err);
         }

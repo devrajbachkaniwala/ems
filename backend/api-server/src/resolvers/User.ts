@@ -8,6 +8,7 @@ import { IContext } from "../interface/IContext";
 import { DeleteResult, ILike, Like } from "typeorm";
 import { ApolloError } from "apollo-server-express";
 import { Review } from "../entity/Review";
+import { Booking } from "../entity/Booking";
 
 config();
 
@@ -148,6 +149,17 @@ export class UserResolver {
     ): Promise<Review[] | undefined> {
         try {
             return await Review.find({ where: { user: { id: parent.id } }, relations: [ 'user', 'event' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+
+    @FieldResolver(type => [Booking], { nullable: true })
+    async bookings(
+        @Root() parent: User
+    ): Promise<Booking[] | undefined> {
+        try {
+            return await Booking.find({ where: { user: { id: parent.id } }, relations: [ 'user', 'event', 'bookingItem' ] });
         } catch(err: any) {
             console.log(err);
         }

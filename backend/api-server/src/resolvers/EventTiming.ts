@@ -1,6 +1,7 @@
 import { ApolloError } from "apollo-server-express";
-import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
 import { DeleteResult } from "typeorm";
+import { BookingItem } from "../entity/BookingItem";
 import { Event } from "../entity/Event";
 import { EventTiming } from "../entity/EventTiming";
 import { Organization } from "../entity/Organization";
@@ -9,7 +10,7 @@ import { AddEventTimingInput } from "../inputs/EventTimingInput/AddEventTimingIn
 import { UpdateEventTimingInput } from "../inputs/EventTimingInput/UpdateEventTimingInput";
 import { IContext } from "../interface/IContext";
 
-@Resolver()
+@Resolver(of => EventTiming)
 export class EventTimingResolver {
     /* 
      *
@@ -149,4 +150,14 @@ export class EventTimingResolver {
         }
     }
 
+    @FieldResolver(type => [BookingItem], { nullable: true })
+    async bookingItems(
+        @Root() parent: EventTiming
+    ): Promise<BookingItem[] | undefined> {
+        try {
+            return await BookingItem.find({ where: { timing: { id: parent.id } }, relations: [ 'booking', 'price', 'timing', 'organization' ] });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
 }

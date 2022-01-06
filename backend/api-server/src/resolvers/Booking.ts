@@ -1,6 +1,6 @@
 import { ApolloError } from "apollo-server-express";
 import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
-import { DeleteResult } from "typeorm";
+import { DeleteResult, Not } from "typeorm";
 import { Booking } from "../entity/Booking";
 import { BookingItem } from "../entity/BookingItem";
 import { Event } from "../entity/Event";
@@ -26,7 +26,7 @@ export class BookingResolver {
         @Ctx() { req }: IContext
     ): Promise<Booking[] | undefined> {
         try {
-            return await Booking.find({ where: { user: { id: req.userId } }, relations: [ 'user', 'event' ] });
+            return await Booking.find({ where: { user: { id: req.userId } }, relations: [ 'user', 'event', 'bookingItem' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -39,7 +39,7 @@ export class BookingResolver {
         @Ctx() { req }: IContext
     ): Promise<Booking | undefined> {
         try {
-            return await Booking.findOne({ where: { id: bookingId, user: { id: req.userId } }, relations: [ 'user', 'event' ] });
+            return await Booking.findOne({ where: { id: bookingId, user: { id: req.userId } }, relations: [ 'user', 'event', 'bookingItem' ] });
         } catch(err: any) {
             console.log(err);
         }
@@ -59,44 +59,40 @@ export class BookingResolver {
         @Ctx() { req }: IContext
     ): Promise<Booking | undefined> {
         try {
-            const event: Event | undefined = await Event.findOne({ where: { id: data.eventId }, relations: [ 'organization' ] });
+            const organization: Organization | undefined = await Organization.findOne({ where: { id: data.orgId } });
+    
+            if(!organization) {
+                throw new ApolloError('Organization not found');
+            }
+
+            const event: Event | undefined = await Event.findOne({ where: { id: data.eventId, organization: { id: organization.id } }, relations: [ 'organization' ] });
     
             if(!event) {
                 throw new ApolloError('Event not found');
             }
     
-            const eventPrice: EventPrice | undefined = await EventPrice.findOne({ where: { id: data.priceId }, relations: [ 'event' ] });
+            const eventPrice: EventPrice | undefined = await EventPrice.findOne({ where: { id: data.priceId, event: { id: event.id } }, relations: [ 'event' ] });
     
             if(!eventPrice) {
                 throw new ApolloError('Event price not found');
             }
     
-            const eventTiming: EventTiming | undefined = await EventTiming.findOne({ where: { id: data.timingId }, relations: [ 'event' ] });
+            const eventTiming: EventTiming | undefined = await EventTiming.findOne({ where: { id: data.timingId, event: { id: event.id } }, relations: [ 'event' ] });
     
             if(!eventTiming) {
                 throw new ApolloError('Event timing not found');
             }
     
-            const organization: Organization | undefined = await Organization.findOne(data.orgId);
-    
-            if(!organization) {
-                throw new ApolloError('Organization not found');
-            }
-    
-            const user: User | undefined = await User.findOne(req.userId);
+            const user: User | undefined = await User.findOne({ where: { id: req.userId } });
     
             if(!user) {
                 throw new ApolloError('User not found');
             }
     
-            if( !(event.id === eventPrice.event.id && event.id === eventTiming.event.id && organization.id === event.organization.id) ) {
-                throw new ApolloError('Timing, price, organization does not match its event');
-            }
-    
             const booking: Booking = await Booking.create({ user, event }).save();
             const bookingItem: BookingItem = await BookingItem.create({ qty: data.qty, booking, price: eventPrice, timing: eventTiming, organization }).save();
     
-            return booking;
+            return bookingItem.booking;
         } catch(err: any) {
             if(err instanceof ApolloError) {
                 throw err;
@@ -112,10 +108,13 @@ export class BookingResolver {
         @Ctx() { req }: IContext
     ): Promise<Boolean | undefined> {
         try {
-            const booking: DeleteResult | undefined = await Booking.delete({ id: bookingId, user: { id: req.userId } } );
-            if(!booking.affected) {
-                throw new ApolloError('Booking not found');
+            const bookingItem: BookingItem | undefined = await BookingItem.findOne({ where: { booking: { id: bookingId, user: { id: req.userId } }, status: Not('cancel') }, relations: [ 'booking', 'price', 'timing', 'organization' ] });
+            if(!bookingItem) {
+                throw new ApolloError(`User's booking not found or already cancelled`);
             }
+
+            bookingItem.status = 'cancel';
+            await bookingItem.save();
             return true;
         } catch(err: any) {
             if(err instanceof ApolloError) {

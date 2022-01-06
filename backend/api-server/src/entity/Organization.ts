@@ -20,9 +20,9 @@ export class Organization extends BaseEntity {
     @Column({ type: 'text' })
     description: string;
 
-    @Field(type => Int)
-    @Column({ type: 'int' })
-    contactNo: number;
+    @Field(type => String)
+    @Column({ type: 'varchar', length: 20 })
+    contactNo: string;
 
     @Field(type => String)
     @Column({ type: 'varchar', length: 255 })

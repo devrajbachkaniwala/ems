@@ -1,6 +1,7 @@
 import { ApolloError } from "apollo-server-express";
 import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
-import { DeleteResult, Not } from "typeorm";
+import { DeleteResult, In, Not } from "typeorm";
+import { BookingItem } from "../entity/BookingItem";
 import { Event } from "../entity/Event";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
@@ -119,26 +120,17 @@ export class OrganizationResolver {
         @Ctx() { req }: IContext
     ): Promise<Organization | undefined> {
         try {
-            const user: User = await User.findOne(req.userId);
+            const user: User | undefined = await User.findOne({ where: { id: req.userId, role: Not('organization') } });
             if(!user) {
-                throw new ApolloError('User does not exist');
+                throw new ApolloError('User does not exist or already a part of an organization');
             }
             
-            if(user.role === 'organization') {
-                throw new ApolloError('User already a part of an organization');
-            }
+            const organization: Organization = await Organization.create(data).save();
+            const orgTeamMember: OrganizationTeamMember = await OrganizationTeamMember.create({ user, organization }).save();
             
             user.role = 'organization';
             await user.save();
-            
-            const organization: Organization = await Organization.create(data).save();
-            if(!organization) {
-                throw new ApolloError('Failed to create an organization');
-            }
-            
-            const orgTeamMember: OrganizationTeamMember = await OrganizationTeamMember.create({ user, organization }).save();
-            
-            return organization;
+            return orgTeamMember.organization;
         } catch(err: any) {
             if(err instanceof ApolloError) {
                 throw err;
@@ -159,6 +151,8 @@ export class OrganizationResolver {
             if(!orgTeamMember) {
                 throw new ApolloError('User is not a part of an organization');
             }
+
+            const teamMembers: OrganizationTeamMember[] | undefined = await OrganizationTeamMember.find({ where: { organization: { id: orgTeamMember.organization.id } }, relations: [ 'user', 'organization' ] });
             
             const org: DeleteResult = await Organization.delete({ id: orgTeamMember?.organization.id });
             
@@ -166,14 +160,15 @@ export class OrganizationResolver {
                 throw new ApolloError('Organization not found');
             }
             
-            const user: User | undefined = await User.findOne(req.userId);
-            
-            if(!user) {
-                throw new ApolloError('User not found');
+            const usersId: string[] = teamMembers.map( member => `${member.user.id}` );
+            for(let userId of usersId) {
+                const user: User | undefined = await User.findOne(userId);
+                if(user) {
+                    user.role = 'user';
+                    await user.save();
+                }
             }
-            
-            user.role = 'user';
-            await user.save();
+        
             return true;
         } catch(err: any) {
             if(err instanceof ApolloError) {
@@ -193,10 +188,10 @@ export class OrganizationResolver {
         try {
             const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: req.userId } }, relations: [ 'user', 'organization' ] });
             if(!orgTeamMember) {
-                throw new ApolloError('User not found');
+                throw new ApolloError('User is not a part of an organization');
             }
     
-            const org: Organization | undefined = await Organization.findOne(orgTeamMember.organization.id);
+            const org: Organization | undefined = await Organization.findOne({ where: { id: orgTeamMember.organization.id } });
             
             if(!org) {
                 throw new ApolloError('Organization not found');
@@ -245,6 +240,17 @@ export class OrganizationResolver {
     ): Promise<Event[] | undefined> {
         try {
             return await Event.find({ relations: [ 'organization' ], where: { organization: { id: parent.id } } });
+        } catch(err: any) {
+            console.log(err);
+        }
+    }
+
+    @FieldResolver(type => [BookingItem], { nullable: true })
+    async bookingItems(
+        @Root() parent: Organization
+    ): Promise<BookingItem[] | undefined> {
+        try {
+            return await BookingItem.find({ where: { organization: { id: parent.id } }, relations: [ 'booking', 'price', 'timing', 'organization' ] });
         } catch(err: any) {
             console.log(err);
         }

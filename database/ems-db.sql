@@ -19,7 +19,7 @@ CREATE TABLE Organizations (
     orgId VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    contactNo INT NOT NULL,
+    contactNo VARCHAR(20) NOT NULL,
     email VARCHAR(255) NOT NULL,
     photo BYTEA NOT NULL,
     createdAt TIMESTAMPTZ DEFAULT NOW(),
@@ -154,11 +154,11 @@ DECLARE
 BEGIN
     SELECT EventPrices.sold INTO soldTicket 
     FROM EventPrices 
-    WHERE EventPrices.priceId = NEW.priceId;
+    WHERE EventPrices.id = NEW."priceId";
 
     totalSold = soldTicket + NEW.qty;
 
-    UPDATE EventPrices SET sold = totalSold WHERE priceId = NEW.priceId;
+    UPDATE EventPrices SET sold = totalSold WHERE id = NEW."priceId";
 
     RETURN NEW;
 
@@ -181,22 +181,22 @@ DECLARE
     soldTicket INTEGER;
     totalSold INTEGER;
 BEGIN
-    SELECT EventPrices.sold INTO soldTicket 
-    FROM EventPrices 
-    WHERE EventPrices.priceId = OLD.priceId;
+    IF NEW.status = 'cancel' THEN    
 
+        SELECT EventPrices.sold INTO soldTicket 
+        FROM EventPrices 
+        WHERE EventPrices.id = OLD."priceId";
 
-    totalSold = soldTicket - OLD.qty;
+        totalSold = soldTicket - OLD.qty;
 
-    UPDATE EventPrices SET sold = totalSold WHERE priceId = OLD.priceId;
-
-    RETURN OLD;
-
+        UPDATE EventPrices SET sold = totalSold WHERE id = OLD."priceId";
+        RETURN OLD;
+    END IF;
 END;
 $$;
 
 CREATE TRIGGER CANCELSOLDTICKET
-BEFORE DELETE
+AFTER UPDATE
 ON BOOKINGITEMS
 FOR EACH ROW
 EXECUTE FUNCTION cancel_sold_ticket();
