@@ -24,7 +24,7 @@ registerRoute.post('/', async (req: Request, res: Response) => {
     
         // If user email exists then send the response Email already exists
         if(emailExist) {
-            return res.json({ message: 'Email already exists' });
+            return res.json({ ok: false, message: 'Email already exists' });
         }
     
         // If email not exists then hash (encrypt) the password provided by the user and assign encrypted password to the password property of newUser
@@ -35,7 +35,7 @@ registerRoute.post('/', async (req: Request, res: Response) => {
         const data: User = await User.create(newUser).save();
     
         // Send the response new user Registered
-        res.status(201).json({ message: 'New user registered' });
+        res.status(201).json({ ok: true, message: 'New user registered' });
     } catch(err: any) {
         throw new Error(err);
     }

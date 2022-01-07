@@ -6,6 +6,7 @@ import { generateToken } from "../shared/generateToken";
 import jwt from 'jsonwebtoken';
 import { IPayload } from "../interface/IPayload";
 import { config } from "dotenv";
+import { RefreshToken } from "../entity/RefreshToken";
 
 // config function is called in order to use environment variable
 config();
@@ -30,7 +31,7 @@ loginRoute.post('/', async (req: Request, res: Response) => {
     
         // If email not exist then send the response no user found with that email
         if(!userData) {
-            return res.json({ message: 'No user found with that email' });
+            return res.json({ ok: false, message: 'No user found with that email' });
         }
     
         // If email exists then comparing the password provided by the user is same as the password stored in the database
@@ -39,7 +40,7 @@ loginRoute.post('/', async (req: Request, res: Response) => {
     
         // If password is incorrect then send the response Invalid password
         if(!hasCorrectCredential) {
-            return res.json({ message: 'Invalid Password' });
+            return res.json({ ok: false, message: 'Invalid Password' });
         }
 
         // If password is correct then get the userId from database of that email and store it in userId property of payload object
@@ -56,8 +57,10 @@ loginRoute.post('/', async (req: Request, res: Response) => {
         // Get jwt refresh token by signing it with payload and refresh token secret key
         const refreshToken: string = jwt.sign(payload, REFRESH_TOKEN_SECRET_KEY);
     
+        await RefreshToken.create({ refreshToken }).save();
+
         // Send json response containing jwt access token and jwt refresh token
-        res.json({ message: 'Provide access token', accessToken: token, refreshToken });
+        res.json({ ok: true, message: 'Provide tokens', accessToken: token, refreshToken });
     } catch(err: any) {
         throw new Error(err);
     }

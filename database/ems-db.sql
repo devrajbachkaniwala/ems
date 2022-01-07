@@ -109,6 +109,13 @@ CREATE TABLE OrganizationTeamMembers (
     CONSTRAINT UQ_ORGANINZATIONTEAMMEMBERS UNIQUE (userId)
 );
 
+CREATE TABLE RefreshTokens (
+    tokenId VARCHAR(255),
+    refreshToken VARCHAR(255) NOT NULL,
+    CONSTRAINT PK_REFRESHTOKENS PRIMARY KEY (tokenId),
+    CONSTRAINT UQ_REFRESHTOKENS UNIQUE (refreshToken)
+);
+
 /* Adding foreign key constraint to the table */
 
 ALTER TABLE Events

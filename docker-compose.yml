@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:11.5
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=ems_db
+    ports: 
+      - 5432:5432
+    volumes:
+      - ${HOME}/docker-postgres-data/:/var/lib/postgresql/data
+      - ./database/ems-db.sql:/docker-entrypoint-initdb.d/ems-db.sql
