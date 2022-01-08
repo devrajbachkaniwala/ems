@@ -47,7 +47,7 @@ config();
         
         const app: Express = express();
     
-        const PORT: number = (process.env.PORT as any) as number || 3001;
+        const PORT: number = (process.env.API_PORT as any) as number || 3001;
     
         await apolloServer.start();
         apolloServer.applyMiddleware({ app });

@@ -32,7 +32,7 @@ config();
 
         // Initializes express and PORT
         const app: Express = express();
-        const PORT: number = (process.env.PORT as any) as number || 3000; 
+        const PORT: number = (process.env.AUTH_PORT as any) as number || 3000; 
         
         // middleware function in order to access req.body as json
         app.use(express.urlencoded({ extended: true }));

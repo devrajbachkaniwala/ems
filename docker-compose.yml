@@ -12,3 +12,27 @@ services:
     volumes:
       - ${HOME}/docker-postgres-data/:/var/lib/postgresql/data
       - ./database/ems-db.sql:/docker-entrypoint-initdb.d/ems-db.sql
+  auth-server:
+    build: ./backend/auth-server/
+    image: auth-server-ems
+    restart: unless-stopped
+    ports: 
+      - 3000:3000
+    environment:
+      - AUTH_PORT=${AUTH_PORT}
+      - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
+      - REFRESH_TOKEN_SECRET_KEY=${REFRESH_TOKEN_SECRET_KEY}
+    depends_on:
+      - postgres
+  api-server:
+    build: ./backend/api-server/
+    image: api-server-ems
+    restart: unless-stopped
+    ports: 
+      - 3001:3001
+    environment:
+      - API_PORT=${API_PORT}
+      - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
+    depends_on:
+      - postgres
+      - auth-server
