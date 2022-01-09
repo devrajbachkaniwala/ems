@@ -3,7 +3,6 @@ import { AuthChecker, ResolverData } from "type-graphql";
 import jwt from 'jsonwebtoken';
 import { User } from "../entity/User";
 import { IContext } from "../interface/IContext";
-import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 
 export const customAuthChecker: AuthChecker<IContext> = async ({ context }: ResolverData<IContext>, roles: string[]): Promise<boolean> => {
     const authHeader: string | undefined = context.req.headers.authorization;

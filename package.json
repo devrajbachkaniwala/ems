@@ -1,0 +1,19 @@
+{
+  "name": "event-management-system",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "docker-compose --env-file ./.env.prod up",
+    "stop": "docker-compose --env-file ./.env.prod down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devrajbachkaniwala/ems.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devrajbachkaniwala/ems/issues"
+  },
+  "homepage": "https://github.com/devrajbachkaniwala/ems#readme"
+}
