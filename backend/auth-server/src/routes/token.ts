@@ -1,8 +1,9 @@
 import { Request, Response, Router } from "express";
-import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
+import { verify, JwtPayload, VerifyErrors } from 'jsonwebtoken';
 import { config } from "dotenv";
 import { generateToken } from "../shared/generateToken";
 import { RefreshToken } from "../entity/RefreshToken";
+import { Env } from "../class/Env";
 
 // config function is called in order to use environment variable
 config();
@@ -33,11 +34,8 @@ tokenRoute.post('/', async (req: Request, res: Response) => {
         return res.json({ ok: false, message: 'Login again' });
     }
 
-    // Get refresh token secret key from environment variable
-    const REFRESH_TOKEN_SECRET_KEY: string = process.env.REFRESH_TOKEN_SECRET_KEY || '';
-
-    // Verifying jwt refresh token with refresh token secret key
-    jwt.verify(token, REFRESH_TOKEN_SECRET_KEY, (err: VerifyErrors | null, payload: JwtPayload | undefined) => {
+    // Verifying jwt refresh token with refresh salt
+    verify(token, Env.refreshSalt, (err: VerifyErrors | null, payload: JwtPayload | undefined) => {
         // If token is invalid then send response invalid token
         if(err) {
             return res.json({ ok: false, message: 'Invalid token' });

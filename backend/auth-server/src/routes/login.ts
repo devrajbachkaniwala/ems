@@ -1,12 +1,13 @@
 import { Request, Response, Router } from "express";
 import { User } from "../entity/User";
 import { ILoginUser } from "../interface/IUser";
-import bycrypt from 'bcryptjs';
+import { compare } from 'bcryptjs';
 import { generateToken } from "../shared/generateToken";
-import jwt from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { IPayload } from "../interface/IPayload";
 import { config } from "dotenv";
 import { RefreshToken } from "../entity/RefreshToken";
+import { Env } from "../class/Env";
 
 // config function is called in order to use environment variable
 config();
@@ -36,7 +37,7 @@ loginRoute.post('/', async (req: Request, res: Response) => {
     
         // If email exists then comparing the password provided by the user is same as the password stored in the database
         const hashPass: string = userData?.password || '';
-        const hasCorrectCredential: boolean = await bycrypt.compare(loginUser.password, hashPass);
+        const hasCorrectCredential: boolean = await compare(loginUser.password, hashPass);
     
         // If password is incorrect then send the response Invalid password
         if(!hasCorrectCredential) {
@@ -51,11 +52,8 @@ loginRoute.post('/', async (req: Request, res: Response) => {
         // Get jwt access token from generateToken function by providing payload as an argument
         const token: string = generateToken(payload);
 
-        // Get refresh token secret key from environment variable
-        const REFRESH_TOKEN_SECRET_KEY: string = process.env.REFRESH_TOKEN_SECRET_KEY || '';
-
-        // Get jwt refresh token by signing it with payload and refresh token secret key
-        const refreshToken: string = jwt.sign(payload, REFRESH_TOKEN_SECRET_KEY);
+        // Get jwt refresh token by signing it with payload and refresh salt
+        const refreshToken: string = sign(payload, Env.refreshSalt);
     
         await RefreshToken.create({ refreshToken }).save();
 
