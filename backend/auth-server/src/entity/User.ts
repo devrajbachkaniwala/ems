@@ -21,7 +21,7 @@ export class User extends BaseEntity {
     password: string;
 
     @Column({ type: 'varchar', length: 20, default: 'user' })
-    role: 'user' | 'admin' | 'organization';
+    role: 'user' | 'admin';
 
     @Column({ type: 'boolean', default: true })
     isActive: boolean;

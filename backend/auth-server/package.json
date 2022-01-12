@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "CHOKIDAR_USEPOLLING=true nodemon src/index.ts",
-    "dev": "CHOKIDAR_USEPOLLING=true tsc --project '.\\tsconfig.json' --watch & nodemon dist",
+    "dev": "CHOKIDAR_USEPOLLING=true tsc --project '.\\tsconfig.json' --watch & CHOKIDAR_USEPOLLING=true nodemon dist",
     "build": "tsc",
     "start:production": "node dist"
   },
