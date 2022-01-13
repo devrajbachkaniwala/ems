@@ -14,11 +14,17 @@ import { EventTimingResolver } from './resolvers/EventTiming';
 import { EventPriceResolver } from './resolvers/EventPrice';
 import { ReviewResolver } from './resolvers/Review';
 import { BookingResolver } from './resolvers/Booking';
-
-config();
+import { Env } from './class/Env';
 
 (async () => {
     try {
+        /* 
+         * 10 Retries for the database connection 
+         * each retry of 5 seconds
+         * If succeeds then break the loop
+         * Otherwise throw an error 
+        */
+
         let retries: number = 10;
         while(retries) {
             try {
@@ -33,26 +39,35 @@ config();
                 await new Promise((res) => setTimeout(res, 5000));
             }
         }
+
+        if(retries === 0) {
+            throw new Error('Failed to establish database connection');
+        }
         
+        // graphql schema
         const schema: GraphQLSchema = await buildSchema({ 
             resolvers: [ UserResolver, OrganizationResolver, EventResolver, EventPhotoResolver, EventTimingResolver, EventPriceResolver, ReviewResolver, BookingResolver ], 
             authChecker: customAuthChecker 
         });
         
+        // Instantiate ApolloServer
         const apolloServer = new ApolloServer({ 
             schema, 
             context: ({ req }: any) => ({ req }), 
             formatError: (err) => err 
         });
         
+        // Initialize express app
         const app: Express = express();
     
-        const PORT: number = (process.env.API_PORT as any) as number || 3001;
-    
+        // start apollo server at /graphql
         await apolloServer.start();
+
+        // apply express app as a middleware in apolloserver's applyMiddleware method
         apolloServer.applyMiddleware({ app });
     
-        app.listen(PORT, () => console.log(`API Server started at port ${PORT}`));
+        // express app listening on port 3001 (port is provided in env)
+        app.listen(Env.port, () => console.log(`API Server started at port ${Env.port}`));
     } catch(err: any) {
         console.log(err);
     }

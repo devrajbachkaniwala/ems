@@ -1,8 +1,10 @@
 import { JwtPayload } from "jsonwebtoken";
 import { AuthChecker, ResolverData } from "type-graphql";
-import jwt from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { User } from "../entity/User";
 import { IContext } from "../interface/IContext";
+import { Env } from "../class/Env";
+import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 
 export const customAuthChecker: AuthChecker<IContext> = async ({ context }: ResolverData<IContext>, roles: string[]): Promise<boolean> => {
     const authHeader: string | undefined = context.req.headers.authorization;
@@ -12,9 +14,7 @@ export const customAuthChecker: AuthChecker<IContext> = async ({ context }: Reso
         return false;
     }
 
-    const ACCESS_TOKEN_SECRET_KEY: string = process.env.ACCESS_TOKEN_SECRET_KEY || '';
-
-    const payload: string | JwtPayload = jwt.verify(token, ACCESS_TOKEN_SECRET_KEY);
+    const payload: string | JwtPayload = verify(token, Env.accessSalt);
 
     if(typeof payload === 'string') {
         return false;
@@ -30,8 +30,8 @@ export const customAuthChecker: AuthChecker<IContext> = async ({ context }: Reso
             }
             
             if(role === 'ORGANIZATION') {
-                const user: User = await User.findOne(context.req.userId);
-                return (user.role === 'organization') ? true : false;
+                const orgTeamMember: OrganizationTeamMember | undefined = await OrganizationTeamMember.findOne({ where: { user: { id: context.req.userId } }, relations: [ 'user', 'organization' ] });
+                return (orgTeamMember) ? true : false;
             }
             
             if(role === 'USER') {
