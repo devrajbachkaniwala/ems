@@ -16,15 +16,15 @@ logoutRoute.post('/', async (req: Request, res: Response) => {
      const authHeader: string | undefined = req.headers.authorization;
      const token: string | undefined = authHeader && authHeader.split(' ')[1];
  
-     // If token is not available in auhtorization then send response token not provided
+     // If token is not available in auhtorization header request then send error response token not provided
      if(!token) {
-         return res.json({ ok: false, message: 'Token not provided' });
+         return res.status(401).json({ errorCode: 'Token error', message: 'Token not provided' });
      }
 
      // Deleting refresh token from database
      const refreshToken: DeleteResult | undefined = await RefreshToken.delete({ refreshToken: token });
      if(!refreshToken.affected) {
-         return res.json({ ok: false, message: 'Token not found' });
+         return res.status(404).json({ errorCode: 'Token error', message: 'Token not found' });
      }
-     return res.json({ ok: true, message: 'Logged out successfully' });
+     return res.sendStatus(204);
 });

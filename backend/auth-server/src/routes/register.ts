@@ -2,6 +2,8 @@ import { Request, Response, Router } from "express";
 import { User } from "../entity/User";
 import { IRegisterUser, IUser } from "../interface/IUser";
 import { hash } from 'bcryptjs';
+import { IValidateError } from "../interface/IValidateError";
+import { Validation } from "../class/Validation";
 
 /* 
 *
@@ -17,17 +19,17 @@ registerRoute.post('/', async (req: Request<null, null, IRegisterUser>, res: Res
     try {
         // Get user data from frontend ( input fields )
         const newUser: IRegisterUser = req.body;
-        const emailRegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-        const passRegExp = new RegExp(`^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.~!@#$%^&()-]).{8,20}$`, 'g');
-
+        
         // Validating email
-        if(!emailRegExp.test(newUser.email)) {
-            return res.status(400).json({ error: 'Invalid value', message: 'Invalid email' });
+        const isEmailValid: boolean | IValidateError = Validation.email(newUser.email);
+        if(typeof isEmailValid === 'object') {
+            return res.status(400).json({ errorCode: 'Email error', message: `${isEmailValid.errMsg}` });
         }
 
         // Validating password
-        if(!passRegExp.test(newUser.password)) {
-            return res.status(400).json({ error: 'Invalid value', message: 'Invalid password' });
+        const isPassValid: boolean | IValidateError = Validation.password(newUser.password);
+        if(typeof isPassValid === 'object') {
+            return res.status(400).json({ errorCode: 'Password error', message: `${isPassValid.errMsg}`});
         }
     
         // Finding if email provided by user exists in the database
@@ -35,12 +37,19 @@ registerRoute.post('/', async (req: Request<null, null, IRegisterUser>, res: Res
     
         // If user email exists then send the response Email already exists
         if(emailExist) {
-            return res.status(400).json({ error: 'Invalid value', message: 'Email already exists' });
+            return res.status(400).json({ errorCode: 'Email error', message: 'Email already exists' });
         }
     
-        // Validating username length
-        if(newUser.username.length < 5) {
-            return res.status(400).json({ error: 'Invalid value', message: 'Username should be at least 5 characters' });
+        // Validating username
+        const isUsernameValid: boolean | IValidateError = Validation.username(newUser.username);
+        if(typeof isUsernameValid === 'object') {
+            return res.status(400).json({ errorCode: 'Username error', message: `${isUsernameValid.errMsg}` });
+        }
+        
+        // Validating fullName
+        const isFullNameValid: boolean | IValidateError = Validation.fullName(newUser.fullName);
+        if(typeof isFullNameValid === 'object') {
+            return res.status(400).json({ errorCode: 'Full Name error', message: `${isFullNameValid.errMsg}` });
         }
 
         // If email not exists then hash (encrypt) the password provided by the user and assign encrypted password to the password property of newUser

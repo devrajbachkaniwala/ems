@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import express, { Express } from 'express';
-import { config } from 'dotenv';
 import { registerRoute } from './routes/register';
 import { Connection, createConnection } from 'typeorm';
 import { loginRoute } from './routes/login';
@@ -8,9 +7,6 @@ import { tokenRoute } from './routes/token';
 import { logoutRoute } from './routes/logout';
 import { Env } from './class/Env';
 import cors from 'cors';
-
-// config function is called in order to use environment variable
-config();
 
 // Connect to the database and start the server if database connection succeeds
 (async () => {

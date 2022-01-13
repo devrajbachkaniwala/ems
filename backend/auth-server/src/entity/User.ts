@@ -5,19 +5,19 @@ export class User extends BaseEntity {
     @PrimaryGeneratedColumn({ type: 'int' })
     id: number;
 
-    @Column({ type: 'varchar', length: 150 })
+    @Column({ type: 'varchar', length: 100 })
     username: string;
     
     @Column({ type: 'bytea', nullable: true })
     userPhoto: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 100 })
     fullName: string;
 
-    @Column({ type: 'varchar', length: 255, unique: true })
+    @Column({ type: 'varchar', length: 150, unique: true })
     email: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 20 })
     password: string;
 
     @Column({ type: 'varchar', length: 20, default: 'user' })

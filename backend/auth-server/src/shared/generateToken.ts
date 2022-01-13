@@ -1,10 +1,6 @@
 import { IPayload } from "../interface/IPayload";
 import { sign } from 'jsonwebtoken';
-import { config } from "dotenv";
 import { Env } from "../class/Env";
-
-// config function is called in order to use environment variable
-config();
 
 // Generates new jwt access token and returns it
 export const generateToken = (payload: IPayload): string => {

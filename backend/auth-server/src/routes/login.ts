@@ -5,12 +5,8 @@ import { compare } from 'bcryptjs';
 import { generateToken } from "../shared/generateToken";
 import { sign } from 'jsonwebtoken';
 import { IPayload } from "../interface/IPayload";
-import { config } from "dotenv";
 import { RefreshToken } from "../entity/RefreshToken";
 import { Env } from "../class/Env";
-
-// config function is called in order to use environment variable
-config();
 
 /* 
 *
@@ -22,7 +18,7 @@ config();
 export const loginRoute: Router = Router();
 
 // POST Request to Login user
-loginRoute.post('/', async (req: Request, res: Response) => {
+loginRoute.post('/', async (req: Request<null, null, ILoginUser>, res: Response) => {
     try {
         // Get user's email and password from frontend ( input fields )
         const loginUser: ILoginUser = req.body;
@@ -30,18 +26,18 @@ loginRoute.post('/', async (req: Request, res: Response) => {
         // Checking if email exists in the database
         const userData: User | undefined = await User.findOne({ where: { email: loginUser.email } });
     
-        // If email not exist then send the response no user found with that email
+        // If email not exist then send the error response no user found with that email
         if(!userData) {
-            return res.json({ ok: false, message: 'No user found with that email' });
+            return res.status(401).json({ errorCode: 'User error', message: 'No user found with that email' });
         }
     
         // If email exists then comparing the password provided by the user is same as the password stored in the database
         const hashPass: string = userData?.password || '';
         const hasCorrectCredential: boolean = await compare(loginUser.password, hashPass);
     
-        // If password is incorrect then send the response Invalid password
+        // If password is incorrect then send the error response Invalid password
         if(!hasCorrectCredential) {
-            return res.json({ ok: false, message: 'Invalid Password' });
+            return res.status(401).json({ errorCode: 'Password error', message: 'Invalid Password' });
         }
 
         // If password is correct then get the userId from database of that email and store it in userId property of payload object
@@ -58,7 +54,7 @@ loginRoute.post('/', async (req: Request, res: Response) => {
         await RefreshToken.create({ refreshToken }).save();
 
         // Send json response containing jwt access token and jwt refresh token
-        res.json({ ok: true, message: 'Provide tokens', accessToken: token, refreshToken });
+        res.status(200).json({ accessToken: token, tokenType: 'Bearer', expiresIn: '30m', refreshToken });
     } catch(err: any) {
         throw new Error(err);
     }
