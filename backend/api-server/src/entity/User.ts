@@ -12,7 +12,7 @@ export class User extends BaseEntity {
     id: number;
 
     @Field(type => String)
-    @Column({ type: 'varchar', length: 150 })
+    @Column({ type: 'varchar', length: 100 })
     username: string;
     
     //@Field(type => String, { nullable: true })
@@ -20,19 +20,19 @@ export class User extends BaseEntity {
     userPhoto: string;
 
     @Field(type => String)
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 100 })
     fullName: string;
 
     @Field(type => String)
-    @Column({ type: 'varchar', length: 255, unique: true })
+    @Column({ type: 'varchar', length: 150, unique: true })
     email: string;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 20 })
     password: string;
 
     @Field(type => String)
     @Column({ type: 'varchar', length: 20, default: 'user' })
-    role: 'user' | 'admin' | 'organization';
+    role: 'user' | 'admin';
 
     @Field(type => Boolean)
     @Column({ type: 'boolean', default: true })

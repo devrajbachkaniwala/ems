@@ -13,7 +13,7 @@ export class Organization extends BaseEntity {
     id: number;
 
     @Field(type => String)
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 100 })
     name: string;
 
     @Field(type => String)
@@ -25,7 +25,7 @@ export class Organization extends BaseEntity {
     contactNo: string;
 
     @Field(type => String)
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 150 })
     email: string;
 
     @Column({ type: 'bytea'})

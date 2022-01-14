@@ -16,7 +16,7 @@ export class Event extends BaseEntity {
     id: number;
 
     @Field()
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 100 })
     name: string;
 
     @Field()
@@ -24,15 +24,15 @@ export class Event extends BaseEntity {
     description: string;
 
     @Field()
-    @Column({ type: 'varchar', length: 200 })
+    @Column({ type: 'varchar', length: 85 })
     city: string;
 
     @Field()
-    @Column({ type: 'varchar', length: 200 })
+    @Column({ type: 'varchar', length: 15 })
     state: string;
 
     @Field()
-    @Column({ type: 'varchar', length: 200 })
+    @Column({ type: 'varchar', length: 56 })
     country: string;
 
     @Field()
@@ -40,7 +40,7 @@ export class Event extends BaseEntity {
     venue: string;
 
     @Field()
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'varchar', length: 50 })
     category: string;
 
     @Column({ type: 'point' })
