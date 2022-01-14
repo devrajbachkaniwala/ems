@@ -2,11 +2,11 @@
 
 CREATE TABLE Users (
     "id" SERIAL,
-    "username" VARCHAR(150) NOT NULL,
+    "username" VARCHAR(100) NOT NULL,
     "userPhoto" BYTEA,
-    "fullName" VARCHAR(255) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
-    "password" VARCHAR(255) NOT NULL,
+    "fullName" VARCHAR(100) NOT NULL,
+    "email" VARCHAR(150) NOT NULL,
+    "password" VARCHAR(20) NOT NULL,
     "role" VARCHAR(20) DEFAULT 'user' NOT NULL,
     "isActive" BOOLEAN DEFAULT TRUE NOT NULL,
     "createdAt" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
@@ -17,10 +17,10 @@ CREATE TABLE Users (
 
 CREATE TABLE Organizations (
     "id" SERIAL,
-    "name" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
     "description" TEXT NOT NULL,
     "contactNo" VARCHAR(20) NOT NULL,
-    "email" VARCHAR(255) NOT NULL,
+    "email" VARCHAR(150) NOT NULL,
     "photo" BYTEA NOT NULL,
     "createdAt" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     "modifiedAt" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
@@ -30,13 +30,13 @@ CREATE TABLE Organizations (
 CREATE TABLE Events (
     "id" SERIAL,
     "orgId" INT NOT NULL,
-    "name" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
     "description" TEXT NOT NULL,
-    "city" VARCHAR(200) NOT NULL,
-    "state" VARCHAR(200) NOT NULL,
-    "country" VARCHAR(200) NOT NULL,
+    "city" VARCHAR(85) NOT NULL,
+    "state" VARCHAR(15) NOT NULL,
+    "country" VARCHAR(56) NOT NULL,
     "venue" VARCHAR(255) NOT NULL,
-    "category" VARCHAR(255) NOT NULL,
+    "category" VARCHAR(50) NOT NULL,
     "geoLatLng" POINT NOT NULL,
     "createdAt" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     "modifiedAt" TIMESTAMPTZ DEFAULT NOW() NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE OrganizationTeamMembers (
 
 CREATE TABLE RefreshTokens (
     "id" SERIAL,
-    "refreshToken" VARCHAR(255) NOT NULL,
+    "refreshToken" VARCHAR(120) NOT NULL,
     CONSTRAINT PK_REFRESHTOKENS PRIMARY KEY ("id"),
     CONSTRAINT UQ_REFRESHTOKENS UNIQUE ("refreshToken")
 );
