@@ -1,7 +1,7 @@
 import { Arg, Authorized, Ctx, FieldResolver, ID, Int, Mutation, Query, Resolver, Root } from "type-graphql";
 import { User } from "../entity/User";
 import { config } from "dotenv";
-import { UserInput } from "../inputs/UserInput";
+import { UpdateUserInput } from "../inputs/UserInput/UpdateUserInput";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 import { IContext } from "../interface/IContext";
@@ -9,6 +9,9 @@ import { DeleteResult, ILike, Like } from "typeorm";
 import { ApolloError } from "apollo-server-express";
 import { Review } from "../entity/Review";
 import { Booking } from "../entity/Booking";
+import { AddUserInput } from "../inputs/UserInput/AddUserInput";
+import axios, { AxiosResponse } from "axios";
+import { IUser } from "../interface/IUser";
 
 config();
 
@@ -81,6 +84,29 @@ export class UserResolver {
         }
     }
 
+    // Create new user
+    @Mutation(type => User)
+    //@Authorized('ADMIN')
+    async createUser(
+        @Arg('data', type => AddUserInput) data: AddUserInput
+    ): Promise<IUser | undefined> {
+        const url: string = `http://localhost:3000/register`;
+
+        /* const res: AxiosResponse<IUser> = await axios.post(url, data); */
+
+        axios.post(url, data)
+        .catch<{ errCode: string, message: string }>(err => {
+            return err
+        })
+        /* if(res.status === 201) {
+            return res.data;
+        }
+        
+        throw  new ApolloError(`status: ${res.status} errorCode: `); */
+
+        return;
+    }
+
     /*
      *
      * USER ROLE 
@@ -101,10 +127,9 @@ export class UserResolver {
     // Update user data
     @Mutation(type => User)
     @Authorized('USER')
-    async updateUser(@Arg('data', type => UserInput) data: UserInput, @Ctx() { req }: IContext): Promise<User | undefined> {
+    async updateUser(@Arg('data', type => UpdateUserInput) data: UpdateUserInput, @Ctx() { req }: IContext): Promise<User | undefined> {
         try {
-            const userId: number = req.userId;
-            const user: User | undefined = await User.findOne(userId);
+            const user: User | undefined = await User.findOne({ where: { id: req.userId } });
             
             if(!user) {
                 throw new ApolloError('User not found');
@@ -113,7 +138,6 @@ export class UserResolver {
             user.username = data.username || user.username;
             user.userPhoto = data.userPhoto || user.userPhoto;
             user.fullName = data.fullName || user.fullName;
-            user.role = data.role || user.role;
 
             await user.save();
 
