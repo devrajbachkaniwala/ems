@@ -1,11 +1,11 @@
-import { Arg, Authorized, Ctx, FieldResolver, ID, Int, Mutation, Query, Resolver, Root } from "type-graphql";
+import { Arg, Authorized, Ctx, FieldResolver, ID, Mutation, Query, Resolver, Root } from "type-graphql";
 import { User } from "../entity/User";
 import { config } from "dotenv";
 import { UpdateUserInput } from "../inputs/UserInput/UpdateUserInput";
 import { Organization } from "../entity/Organization";
 import { OrganizationTeamMember } from "../entity/OrganizationTeamMember";
 import { IContext } from "../interface/IContext";
-import { DeleteResult, ILike, Like } from "typeorm";
+import { DeleteResult, ILike } from "typeorm";
 import { ApolloError } from "apollo-server-express";
 import { Review } from "../entity/Review";
 import { Booking } from "../entity/Booking";
@@ -86,25 +86,25 @@ export class UserResolver {
 
     // Create new user
     @Mutation(type => User)
-    //@Authorized('ADMIN')
+    @Authorized('ADMIN')
     async createUser(
         @Arg('data', type => AddUserInput) data: AddUserInput
     ): Promise<IUser | undefined> {
-        const url: string = `http://localhost:3000/register`;
+        // When application running in docker container, it request from auth-server container
+        const url: string = `http://auth-server:3000/register`;
 
-        /* const res: AxiosResponse<IUser> = await axios.post(url, data); */
+        // When application running in local environment, it request from localhost
+        //const url: string = `http://localhost:3000/register`;
 
-        axios.post(url, data)
-        .catch<{ errCode: string, message: string }>(err => {
-            return err
-        })
-        /* if(res.status === 201) {
-            return res.data;
-        }
-        
-        throw  new ApolloError(`status: ${res.status} errorCode: `); */
-
-        return;
+        // POST request to auth server in order to register new user
+        const res: AxiosResponse<IUser> = await axios.post<IUser, AxiosResponse<IUser>, AddUserInput>(url, data)
+                                                .catch( (err: any) => {
+                                                    throw new ApolloError(`${err.response.data.errorCode}: ${err.response.data.message}`);
+                                                });
+    
+        res.data.createdAt = new Date(res.data.createdAt);
+        res.data.modifiedAt = new Date(res.data.modifiedAt);
+        return res.data;
     }
 
     /*

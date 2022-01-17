@@ -20,8 +20,8 @@ services:
       - 3000:3000
     environment:
       - AUTH_PORT=${AUTH_PORT}
-      - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
-      - REFRESH_TOKEN_SECRET_KEY=${REFRESH_TOKEN_SECRET_KEY}
+      - ACCESS_SALT=${ACCESS_SALT}
+      - REFRESH_SALT=${REFRESH_SALT}
     depends_on:
       - postgres
   api-server:
@@ -32,7 +32,7 @@ services:
       - 3001:3001
     environment:
       - API_PORT=${API_PORT}
-      - ACCESS_TOKEN_SECRET_KEY=${ACCESS_TOKEN_SECRET_KEY}
+      - ACCESS_SALT=${ACCESS_SALT}
     depends_on:
       - postgres
       - auth-server
