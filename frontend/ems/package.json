@@ -2,19 +2,29 @@
   "name": "ems",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "schema:download": "npx apollo service:download --endpoint=http://localhost:3001/graphql ./app/graphql/graphql-schema.json",
+    "schema:generate-watch": "npx apollo codegen:generate --localSchemaFile=./app/graphql/graphql-schema.json --target=typescript --tagName=gql --watch"
   },
   "dependencies": {
+    "@apollo/client": "^3.5.8",
+    "@reduxjs/toolkit": "^1.7.1",
+    "axios": "^0.25.0",
+    "graphql": "^16.3.0",
     "next": "12.0.7",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-redux": "^7.2.6"
   },
   "devDependencies": {
+    "@types/graphql": "^14.5.0",
     "@types/node": "17.0.8",
     "@types/react": "17.0.38",
+    "@types/react-redux": "^7.1.22",
+    "apollo": "^2.33.9",
     "autoprefixer": "^10.4.2",
     "eslint": "8.6.0",
     "eslint-config-next": "12.0.7",

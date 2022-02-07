@@ -1,78 +1,121 @@
-import { IUserValidateError } from '../interface/IUserValidateError'
+import { TValidateError } from 'types/validateError'
 
 // Validation class to validate fields
-export class Validation {
+export class UserValidation {
 
     // Email validator
-    static email(email: string): boolean | IUserValidateError {
+    static async email(email: string): Promise<boolean> {
         const emailRegExp: RegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     
+        if(!email.length) {
+            throw new Error('Email is required');
+            //return { errMsg: 'Email is required' };
+        }
+        
         if(!emailRegExp.test(email)) {
-            return { errMsg: 'Invalid email' };
+            throw new Error('Invalid email');
+            //return { errMsg: 'Invalid email' };
         }
     
         if(email.length > 150) {
-            return { errMsg: 'Email length should be less than or equal to 150' };
+            throw new Error('Email length should be less than or equal to 150');
+            //return { errMsg: 'Email length should be less than or equal to 150' };
         }
     
         return true;
     }
 
     // Password validator
-    static password(password: string): boolean | IUserValidateError {
+    static async password(password: string): Promise<boolean> {
         const passwordRegExp: RegExp = new RegExp(`^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!"\#$%&'()*+,\-./:;<=>?@\[\\\]^_‘{|}~]).{8,20}$`, 'g');
     
+        if(!password.length) {
+            throw new Error('Password is required');
+            //return { errMsg: 'Password is required' };
+        }
+        
         if(password.length < 8) {
-            return { errMsg: 'Password should be at least 8 characters' };
+            throw new Error('Password should be at least 8 characters');
+            //return { errMsg: 'Password should be at least 8 characters' };
         }
     
         if(password.length > 20) {
-            return { errMsg: 'Password should be at most 20 characters' };
+            throw new Error('Password should be at most 20 characters');
+            //return { errMsg: 'Password should be at most 20 characters' };
         }
     
         if(!passwordRegExp.test(password)) {
-            return { errMsg: 'Password should contain uppercase, lowercase, digit, symbol' };
+            throw new Error('Password should contain uppercase, lowercase, digit, symbol');
+            //return { errMsg: 'Password should contain uppercase, lowercase, digit, symbol' };
         }
     
         return true;
     }
 
     // Username validator
-    static username(username: string): boolean | IUserValidateError {
+    static async username(username: string): Promise<boolean> {
         const usernameRegExp: RegExp = /^\w{5,100}$/;
         
+        if(!username.length) {
+            throw new Error('Username is required');
+            //return { errMsg: 'Username is required' }
+        }
+        
         if(username.length < 5) {
-            return { errMsg: 'Username should be at least 5 characters' }
+            throw new Error('Username should be at least 5 characters');
+            //return { errMsg: 'Username should be at least 5 characters' }
         }
     
         if(username.length > 100) {
-            return { errMsg: 'Username should be at most 100 characters' }
+            throw new Error('Username should be at most 100 characters');
+            //return { errMsg: 'Username should be at most 100 characters' }
         }
     
         if(!usernameRegExp.test(username)) {
-            return { errMsg: 'Username can be uppercase, lowercase, digit or can contain underscore' }
+            throw new Error('Username can be uppercase, lowercase, digit or can contain underscore');
+            //return { errMsg: 'Username can be uppercase, lowercase, digit or can contain underscore' }
         }
     
         return true;
     }
 
     // FullName validator
-    static fullName(fullName: string): boolean | IUserValidateError {
-        const fullNameRegExp: RegExp = /^[a-zA-Z ]{5,100}/;
+    static async fullName(fullName: string): Promise<boolean> {
+        const fullNameRegExp: RegExp = /^[a-zA-Z ]*$/;
 
+        if(!fullName.length) {
+            throw new Error('Full Name is required');
+            //return { errMsg: 'Full Name is required' }
+        }
+        
         if(fullName.length < 5) {
-            return { errMsg: 'FullName should be at least 5 characters' }
+            throw new Error('Full Name should be at least 5 characters');
+            //return { errMsg: 'Full Name should be at least 5 characters' }
         }
     
         if(fullName.length > 100) {
-            return { errMsg: 'FullName should be at most 100 characters' }
+            throw new Error('Full Name should be at most 100 characters');
+            //return { errMsg: 'Full Name should be at most 100 characters' }
         }
     
         if(!fullNameRegExp.test(fullName)) {
-            return { errMsg: 'FullName can be uppercase or lowercase' }
+            throw new Error('Full Name can be uppercase or lowercase');
+            //return { errMsg: 'Full Name can be uppercase or lowercase' }
         }
 
         return true;
+    }
+
+    static async confirmPassword(confirmPasswd: string, passwd: string): Promise<boolean> {
+        if(!confirmPasswd.length) {
+            throw new Error('Confirm Password is required');
+        }
+
+        if(confirmPasswd === passwd) {
+            return true;
+        } else {
+            throw new Error('Confirm Password does not match Password');
+        }
     }
 
 }
