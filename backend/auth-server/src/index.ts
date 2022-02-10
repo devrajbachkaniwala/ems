@@ -42,7 +42,10 @@ import cors from 'cors';
         const app: Express = express();
 
         // Allow cross origin
-        app.use(cors());
+        app.use(cors({ 
+            origin: 'http://localhost:4000',
+            credentials: true 
+        }));
         
         // middleware function in order to access req.body as json
         app.use(express.urlencoded({ extended: true }));

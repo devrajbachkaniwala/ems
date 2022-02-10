@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "start": "docker-compose --env-file ./.env.prod up",
-    "stop": "docker-compose --env-file ./.env.prod down"
+    "stop": "docker-compose --env-file ./.env.prod down",
+    "build": "docker-compose --env-file ./.env.prod build"
   },
   "repository": {
     "type": "git",

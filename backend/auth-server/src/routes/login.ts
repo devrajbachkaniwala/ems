@@ -2,11 +2,12 @@ import { Request, Response, Router } from "express";
 import { User } from "../entity/User";
 import { ILoginUser } from "../interface/IUser";
 import { compare } from 'bcryptjs';
-import { generateToken } from "../shared/generateToken";
+import { generateAccessToken } from "../shared/generateToken";
 import { sign } from 'jsonwebtoken';
 import { IPayload } from "../interface/IPayload";
 import { RefreshToken } from "../entity/RefreshToken";
 import { Env } from "../class/Env";
+import { serialize } from 'cookie';
 
 /* 
 *
@@ -28,7 +29,7 @@ loginRoute.post('/', async (req: Request<null, null, ILoginUser>, res: Response)
     
         // If email not exist then send the error response no user found with that email
         if(!userData) {
-            return res.status(401).json({ errorCode: 'User error', message: 'No user found with that email' });
+            return res.status(404).json({ errorCode: 'User error', message: 'No user found with that email' });
         }
     
         // If email exists then comparing the password provided by the user is same as the password stored in the database
@@ -46,15 +47,27 @@ loginRoute.post('/', async (req: Request<null, null, ILoginUser>, res: Response)
         };
 
         // Get jwt access token from generateToken function by providing payload as an argument
-        const token: string = generateToken(payload);
+        const accessToken: string = generateAccessToken(payload);
 
         // Get jwt refresh token by signing it with payload and refresh salt
         const refreshToken: string = sign(payload, Env.refreshSalt);
     
         await RefreshToken.create({ refreshToken }).save();
 
+        // serializing httpOnly cookie
+        const serialized = serialize('authJwt', refreshToken, {
+            httpOnly: true,
+            secure: Env.nodeEnv !== 'development',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 2,
+            path: '/'
+        });
+
+        // setting headers to set cookie
+        res.setHeader('Set-Cookie', serialized);
+
         // Send json response containing jwt access token and jwt refresh token
-        res.status(200).json({ accessToken: token, tokenType: 'Bearer', expiresIn: '30m', refreshToken });
+        res.status(200).json({ accessToken, tokenType: 'Bearer', expiresIn: '30m', refreshToken });
     } catch(err: any) {
         throw new Error(err);
     }

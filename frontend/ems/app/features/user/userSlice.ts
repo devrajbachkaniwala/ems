@@ -1,9 +1,10 @@
 import { AsyncThunk, createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios, { AxiosResponse } from 'axios';
 import { TRegisterUser, TUser, TLoginUser } from "types/user";
-import { TToken } from "../../../types/token";
+import { TTokens as IUserProfile } from "../../../types/token";
 import userService from "../../services/userService";
 import { Env } from "class/Env";
+import { UserProfile } from '@/services/userService/__generated__/UserProfile';
 
 /* export const registerUser: AsyncThunk<TUser, TRegisterUser, {} > = createAsyncThunk(
     'user/registerUserStatus', 
@@ -38,7 +39,7 @@ import { Env } from "class/Env";
 
 
 type TInitialState = {
-    value: TToken | null;
+    value: UserProfile["user"] | null;
 }
 
 const initialState: TInitialState = {
@@ -49,7 +50,7 @@ const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        setUserState: (state, { payload }: PayloadAction<TToken>) => {
+        setUserState: (state, { payload }: PayloadAction<UserProfile['user']>) => {
             state.value = payload;
         }
     },

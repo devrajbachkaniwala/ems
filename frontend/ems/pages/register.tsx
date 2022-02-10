@@ -48,11 +48,12 @@ const Register: NextPage = () => {
     const [formValues, setFormValues] = useState<TFormValues>(initialFormValues);
     const [formErrors, setFormErrors] = useState<TFormErrors>({});
     const [isSubmit, setIsSubmit] = useState<boolean>(true);
+    const [errMsg, setErrMsg] = useState<string | null>(null);
     //const imgRef = useRef<HTMLInputElement | null>(null);
     
     //const dispatch = useAppDispatch();
 
-    //const router = useRouter();
+    const router = useRouter();
 
     /* const validations = (name: TUserFields, value: string): boolean | TValidateError => {
         let errors: any = {};
@@ -289,16 +290,27 @@ const Register: NextPage = () => {
 
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+        try {
+            e.preventDefault();
+    
+            const isValidCredentials = await validate();
+    
+            if(!isValidCredentials) {
+                console.log('error');
+                return;
+            }
+    
+            const res = await userService.registerUser(formValues);
+            
+            console.log(res);
+            setErrMsg(null);
 
-        const isValidCredentials = await validate();
+            console.log('success outside');
 
-        if(!isValidCredentials) {
-            console.log('error');
-            return;
+            router.push('/login');
+        } catch(err: any) {
+            setErrMsg(err.message);
         }
-
-        console.log('success outside');
         
     }
     
@@ -308,6 +320,7 @@ const Register: NextPage = () => {
             {isSubmit.toString()}            
             <form className='flex flex-col p-2 max-w-md justify-center shadow-md' onSubmit={handleSubmit}>
                 {/* Profile pic left */}
+                <span className='inline-block text-red-600 text-xl'>{errMsg}</span>
 
                 <span className='inline-block text-red-600 text-lg'>{formErrors.userPhoto && formErrors.userPhoto}</span>
                 

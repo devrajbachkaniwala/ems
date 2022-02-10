@@ -18,4 +18,9 @@ export class Env {
     static get accessSalt(): string {
         return process.env.ACCESS_SALT || '';
     }
+
+    // Node environment
+    static get nodeEnv(): string {
+        return process.env.NODE_ENV || 'development';
+    }
 }

@@ -1,8 +1,9 @@
 import { Request, Response, Router } from "express";
 import { verify, JwtPayload, VerifyErrors } from 'jsonwebtoken';
-import { generateToken } from "../shared/generateToken";
+import { generateAccessToken } from "../shared/generateToken";
 import { RefreshToken } from "../entity/RefreshToken";
 import { Env } from "../class/Env";
+import { parse } from 'cookie';
 
 /* 
 *
@@ -15,16 +16,25 @@ export const tokenRoute: Router = Router();
 
 // POST Request to create new access token from refresh token
 tokenRoute.post('/', async (req: Request, res: Response) => {
-    // Get jwt refresh token from authorization header
-    const authHeader: string | undefined = req.headers.authorization;
-    const token: string | undefined = authHeader && authHeader.split(' ')[1];
 
-    // If token is not available in auhtorization header of the request then send error response token not provided
-    if(!token) {
+    // getting cookies;
+    const cookies  = parse(req.headers.cookie || '');
+    
+    // if authJwt cookie is not available in the cookies then user is unauthorized to access this route
+    if(!cookies.authJwt) {
         return res.status(401).json({ errorCode: 'Token error', message: 'Token not provided' });
     }
 
-    const refreshTokenExist: RefreshToken | undefined = await RefreshToken.findOne({ where: { refreshToken: token } });
+/*     // Get jwt refresh token from authorization header
+    const authHeader: string | undefined = req.headers.authorization;
+    const token: string | undefined = authHeader && authHeader.split(' ')[1]; */
+
+/*     // If token is not available in auhtorization header of the request then send error response token not provided
+    if(!token) {
+        return res.status(401).json({ errorCode: 'Token error', message: 'Token not provided' });
+    } */
+
+    const refreshTokenExist: RefreshToken | undefined = await RefreshToken.findOne({ where: { refreshToken: cookies.authJwt } });
 
     if(!refreshTokenExist) {
         return res.status(404).json({ errorCode: 'Token error', message: 'Token not found' });
@@ -38,7 +48,7 @@ tokenRoute.post('/', async (req: Request, res: Response) => {
         }
 
         // If token is valid then generate new jwt access token
-        const token: string = generateToken({ userId: payload?.userId });
+        const token: string = generateAccessToken({ userId: payload?.userId });
 
         // Send response of newly generated jwt access token
         res.status(200).json({ accessToken: token, tokenType: 'Bearer', expiresIn: '30m' });

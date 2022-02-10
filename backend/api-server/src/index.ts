@@ -4,7 +4,6 @@ import { Connection, createConnection } from 'typeorm';
 import express, { Express } from 'express';
 import { buildSchema } from 'type-graphql';
 import { GraphQLSchema } from 'graphql';
-import { config } from 'dotenv';
 import { EventResolver } from './resolvers/Event';
 import { UserResolver } from './resolvers/User';
 import { customAuthChecker } from './middleware/authChecker';
@@ -15,6 +14,7 @@ import { EventPriceResolver } from './resolvers/EventPrice';
 import { ReviewResolver } from './resolvers/Review';
 import { BookingResolver } from './resolvers/Booking';
 import { Env } from './class/Env';
+import cors from 'cors';
 
 (async () => {
     try {
@@ -59,6 +59,9 @@ import { Env } from './class/Env';
         
         // Initialize express app
         const app: Express = express();
+
+        // Allow cross origin
+        app.use(cors());
     
         // start apollo server at /graphql
         await apolloServer.start();
