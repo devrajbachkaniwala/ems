@@ -1,9 +1,14 @@
-import { AsyncThunk, createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  AsyncThunk,
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+} from '@reduxjs/toolkit';
 import axios, { AxiosResponse } from 'axios';
-import { TRegisterUser, TUser, TLoginUser } from "types/user";
-import { TTokens as IUserProfile } from "../../../types/token";
-import userService from "../../services/userService";
-import { Env } from "class/Env";
+import { TRegisterUser, TUser, TLoginUser } from 'types/user';
+import { TTokens as IUserProfile } from '../../../types/token';
+import userService from '../../services/userService';
+import { Env } from 'class/Env';
 import { UserProfile } from '@/services/userService/__generated__/UserProfile';
 
 /* export const registerUser: AsyncThunk<TUser, TRegisterUser, {} > = createAsyncThunk(
@@ -37,25 +42,24 @@ import { UserProfile } from '@/services/userService/__generated__/UserProfile';
     }
 ); */
 
-
 type TInitialState = {
-    value: UserProfile["user"] | null;
-}
+  value: UserProfile['user'] | null;
+};
 
 const initialState: TInitialState = {
-    value: null
-}
+  value: null,
+};
 
 const userSlice = createSlice({
-    name: 'user',
-    initialState,
-    reducers: {
-        setUserState: (state, { payload }: PayloadAction<UserProfile['user']>) => {
-            state.value = payload;
-        }
+  name: 'user',
+  initialState,
+  reducers: {
+    setUserState: (state, { payload }: PayloadAction<UserProfile['user']>) => {
+      state.value = payload;
     },
-    extraReducers: (builder) => {
-        /* builder.addCase(registerUser.fulfilled, (state, { payload }) => {
+  },
+  extraReducers: (builder) => {
+    /* builder.addCase(registerUser.fulfilled, (state, { payload }) => {
             state.loading = false;
             state.data = payload;
             state.error = null;
@@ -66,8 +70,7 @@ const userSlice = createSlice({
             state.data = null;
             state.error = payload as string;
         }); */
-
-      /*   builder.addCase(loginUser.fulfilled, (state, { payload }) => {
+    /*   builder.addCase(loginUser.fulfilled, (state, { payload }) => {
             state.loading = true;
             state.data = payload;
             state.error = null;
@@ -78,8 +81,7 @@ const userSlice = createSlice({
             state.data = null;
             state.error = payload as string;
         }); */
-
-    }
+  },
 });
 
 export const { setUserState } = userSlice.actions;

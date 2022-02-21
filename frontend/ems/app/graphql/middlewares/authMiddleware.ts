@@ -1,16 +1,15 @@
-import { ApolloLink, NextLink, Operation } from "@apollo/client";
-import { TTokens } from "types/token";
+import { ApolloLink, NextLink, Operation } from '@apollo/client';
+import { TTokens } from 'types/token';
 
-export const authMiddleware = (token: TTokens) =>  new ApolloLink((operation : Operation, forward: NextLink) => {
+export const authMiddleware = (token: TTokens) =>
+  new ApolloLink((operation: Operation, forward: NextLink) => {
     const headers: { authorization: string } = {
-      authorization: `${token.tokenType} ${token.accessToken}`
+      authorization: `Bearer ${token.accessToken}`,
     };
     console.log('authLink operation');
     operation.setContext((req: any, prevCtx: any) => ({ ...prevCtx, headers }));
-    return forward(operation).map(data => {
+    return forward(operation).map((data) => {
       console.log('after operation execution');
       return data;
     });
   });
-
-  

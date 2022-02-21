@@ -1,0 +1,11 @@
+.listItem {
+  @apply ml-7 pb-2 h-[82px] sm:h-full first:ml-0 hover:text-gray-900 hover:border-b-2 hover:border-gray-900  hover:cursor-pointer;
+}
+
+.selected {
+    @apply text-blue-600 border-b-2 border-blue-600 hover:text-blue-600 hover:cursor-pointer;
+}
+
+.card-container {
+  @apply h-80 bg-slate-600;
+}

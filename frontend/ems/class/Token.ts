@@ -11,13 +11,13 @@ class Token {
         this.accessToken = token;
     }
 
-    getRefreshTokenFromLocalStorage(): string {        
+    /* getRefreshTokenFromLocalStorage(): string {        
         return localStorage.getItem('auth') || '';
     }
 
     setRefreshTokenToLocalStorage(token: string): void {
         localStorage.setItem('auth', token);
-    }
+    } */
 }
 
 export default new Token();
