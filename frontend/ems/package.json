@@ -26,6 +26,7 @@
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "17.0.8",
     "@types/react": "17.0.38",
+    "@types/react-dom": "^17.0.11",
     "@types/react-redux": "^7.1.22",
     "apollo": "^2.33.9",
     "autoprefixer": "^10.4.2",

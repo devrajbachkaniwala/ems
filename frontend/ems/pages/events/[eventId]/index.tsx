@@ -1,6 +1,14 @@
+import Modal from 'components/modal';
+import OrganizationContactPopUp from 'components/organizationContactPopUp';
 import Link from 'next/link';
+import { useState } from 'react';
+import { MdClose } from 'react-icons/md';
 
 const EventDetail = () => {
+  const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
+  const [showOrganizationPopUp, setShowOrganizationPopUp] =
+    useState<boolean>(false);
+
   return (
     <>
       {/* Main container */}
@@ -38,11 +46,17 @@ const EventDetail = () => {
           {/* 2nd row  Register button container */}
           <div className='w-full text-right border-b-2 py-3'>
             <div className='inline-block w-2/6 text-center'>
-              <Link href='/events/123/order'>
+              {/* <Link href='/events/123/order'>
                 <a className='inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 bg-green-700 text-white hover:bg-green-600 transition duration-200 ease-linear'>
                   Register
                 </a>
-              </Link>
+              </Link> */}
+              <button
+                className='inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 bg-green-700 text-white hover:bg-green-600 transition duration-200 ease-linear'
+                onClick={() => setShowRegisterModal(true)}
+              >
+                Register
+              </button>
             </div>
           </div>
 
@@ -90,6 +104,18 @@ const EventDetail = () => {
                   </select>
                 </div>
 
+                <div className='my-10'>
+                  <select
+                    name='selectPrice'
+                    className='border-2 border-slate-300 bg-slate-50 py-3 px-2 w-full hover:cursor-pointer focus:border-blue-600 text-slate-900'
+                  >
+                    <option value=''>Select a different price plan</option>
+                    <option value=''>199 INR</option>
+                    <option value=''>299 INR</option>
+                    <option value=''>399 INR</option>
+                  </select>
+                </div>
+
                 <section className='text-slate-900'>
                   <h2 className='font-semibold'>Location</h2>
                   <div className='leading-5 mt-2'>
@@ -124,7 +150,10 @@ const EventDetail = () => {
                 Organization Name
               </h2>
               <div className='text-center mt-1'>
-                <button className='inline-block px-2 py-1 rounded-md border-2 border-blue-600 hover:bg-blue-600 hover:text-white transition duration-200 ease-linear'>
+                <button
+                  className='inline-block px-2 py-1 rounded-md border-2 border-blue-600 hover:bg-blue-600 hover:text-white transition duration-200 ease-linear'
+                  onClick={() => setShowOrganizationPopUp(true)}
+                >
                   Contact
                 </button>
               </div>
@@ -132,6 +161,92 @@ const EventDetail = () => {
           </div>
         </div>
       </div>
+
+      {showRegisterModal && (
+        <Modal>
+          {/* Modal container */}
+          <div className='fixed bg-black bg-opacity-70 z-[1000] top-0 right-0 bottom-0 left-0 flex flex-col justify-center items-center'>
+            <div className='grid md:grid-cols-[70%_30%] overflow-auto md:overflow-hidden lg:w-4/5 xl:w-3/5 h-4/5 mx-10 bg-slate-50 rounded-lg  text-slate-700 relative'>
+              {/* Left side modal container */}
+              <div className=''>
+                <section className=' px-4 py-2 text-center border-b-2'>
+                  <h2 className='text-xl font-bold'>Event Name</h2>
+                  <p className='text-sm font-semibold'>
+                    Sun, Mar 13, 2022 2:00Pm - 3:00PM IST
+                  </p>
+                </section>
+
+                <section className='my-10 mx-7'>
+                  <h3 className='mb-1'>Select a different price plan</h3>
+                  <select
+                    name='selectPrice'
+                    className='border-2 border-slate-300 bg-slate-50 p-1 w-52 hover:cursor-pointer focus:border-blue-600 text-slate-900'
+                  >
+                    <option value=''>199 INR</option>
+                    <option value=''>299 INR</option>
+                    <option value=''>399 INR</option>
+                  </select>
+                </section>
+
+                <section className='my-10 mx-7'>
+                  <h3 className='mb-1'>Select quantity</h3>
+                  <select
+                    name='selectQty'
+                    className='border-2 border-slate-300 bg-slate-50 p-1 w-52 hover:cursor-pointer focus:border-blue-600 text-slate-900'
+                  >
+                    {'1,2,3,4,5,6,7,8,9,10'.split(',').map((item) => {
+                      return (
+                        <option key={item} value={+item}>
+                          {+item}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </section>
+              </div>
+
+              {/* Right side modal container */}
+              <div className='bg-slate-100'>
+                <section>
+                  <img
+                    src='/images/event-pic-2.jpg'
+                    alt=''
+                    className='w-full h-auto object-cover'
+                  />
+                </section>
+                <section className='my-5 mx-5'>
+                  <h3 className='text-slate-900 mb-2'>Order summary</h3>
+                  <div className='border-b-2 pb-2 mb-2'>
+                    <div className='flex'>
+                      <p className='flex-grow'>1 x plan</p>
+                      <p>199.00</p>
+                    </div>
+                  </div>
+                  <div className='flex'>
+                    <p className='flex-grow'>Total</p>
+                    <p>INR 199.00</p>
+                  </div>
+                </section>
+                <div className='flex flex-col justify-center items-center'>
+                  <button className='my-2 px-2 py-1 rounded-md bg-green-500 hover:bg-green-700 hover:text-slate-50'>
+                    Register
+                  </button>
+                </div>
+              </div>
+              <MdClose
+                onClick={() => setShowRegisterModal(false)}
+                className='absolute text-lg text-slate-700 top-0 right-0 hover:cursor-pointer'
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {showOrganizationPopUp && (
+        <OrganizationContactPopUp
+          closeOrganizationContactPopUp={() => setShowOrganizationPopUp(false)}
+        />
+      )}
     </>
   );
 };
