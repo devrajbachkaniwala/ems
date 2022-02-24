@@ -2,11 +2,21 @@ import { FC } from 'react';
 import { MdClose } from 'react-icons/md';
 import Modal from './modal';
 
+type TOrgDetail = {
+  id: number;
+  name: string;
+  description: string;
+  contactNo: string;
+  email: string;
+};
+
 type TOrganizationContactPopUp = {
+  orgDetail: TOrgDetail;
   closeOrganizationContactPopUp: () => void;
 };
 
 const OrganizationContactPopUp: FC<TOrganizationContactPopUp> = ({
+  orgDetail,
   closeOrganizationContactPopUp
 }) => {
   return (
@@ -16,10 +26,11 @@ const OrganizationContactPopUp: FC<TOrganizationContactPopUp> = ({
         <div className='mx-10 bg-slate-50 rounded-lg text-slate-700 relative'>
           <section className='px-10 py-5 text-center'>
             <h2 className='text-lg text-slate-900 font-bold'>
-              Organization Name
+              {orgDetail.name}
             </h2>
-            <p>organization@test.com</p>
-            <p>1234567890</p>
+            <p>{orgDetail.description}</p>
+            <p>{orgDetail.email}</p>
+            <p>{orgDetail.contactNo}</p>
           </section>
           <MdClose
             onClick={closeOrganizationContactPopUp}

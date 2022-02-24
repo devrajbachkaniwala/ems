@@ -3,32 +3,32 @@
 @tailwind utilities;
 
 .form {
-    @apply flex flex-col p-3 shadow-2xl shadow-slate-400 w-[425px] rounded-lg bg-slate-50;
+  @apply flex flex-col p-3 shadow-2xl shadow-slate-400 w-[425px] rounded-lg bg-slate-50;
 }
 
 .form-heading {
-    @apply text-xl text-center text-slate-700 font-bold mb-5;
+  @apply text-xl text-center text-slate-700 font-bold mb-5;
 }
 
 .form-group {
-    @apply w-full mb-3 flex justify-between items-start sm:items-baseline;
+  @apply w-full mb-3 flex justify-between items-start sm:items-baseline;
 }
 
-.form-group label {
-    @apply inline-block cursor-pointer text-slate-700;
+.form-group > label {
+  @apply inline-block cursor-pointer text-slate-700;
 }
 
-.form-group input[type=text],
-.form-group input[type=email],
-.form-group input[type=password] {
-    @apply inline-block px-2 py-1 bg-slate-100 text-slate-700 outline-none border-2 border-slate-400 rounded-xl hover:border-slate-700 focus:border-slate-700;
-
+.form-group > input[type='text'],
+.form-group > input[type='email'],
+.form-group > input[type='password'],
+.form-group > textarea {
+  @apply inline-block px-2 py-1 bg-slate-100 text-slate-700 outline-none border-2 border-slate-400 rounded-xl hover:border-slate-700 focus:border-slate-700;
 }
 
 .btn {
-    @apply py-2 text-white bg-green-700 hover:bg-green-600 hover:text-gray-800 rounded-xl focus:outline-none;
+  @apply py-2 text-white bg-green-700 hover:bg-green-600 hover:text-gray-800 rounded-xl focus:outline-none;
 }
 
 .input-error {
-    @apply inline-block text-red-600 text-lg;
+  @apply inline-block text-red-600 text-lg;
 }

@@ -1,8 +1,8 @@
-import EventListItem from './eventListItem';
-import Link from 'next/link';
-import { FC } from 'react';
+import { TMyBookings } from 'pages/my-bookings';
+import { FC, ReactNode } from 'react';
+import BookingEventListItem from './bookingEventListItem';
 
-type TEvent = {
+/* type TEvent = {
   id: number;
   name: string;
   date: Date;
@@ -15,14 +15,13 @@ type TEvent = {
   prices: {
     price: number;
   }[];
+}; */
+
+type TBookingEventListsProps = {
+  myBookings: TMyBookings[];
 };
 
-type TEventListsProps = {
-  ev: TEvent[];
-  cancelBooking?: (id: number) => void;
-};
-
-export const events: TEvent[] = [
+/* export const events: TEvent[] = [
   {
     id: 1,
     name: 'Surat Video Speed Dating',
@@ -77,29 +76,23 @@ export const events: TEvent[] = [
       }
     ]
   }
-];
+]; */
 
-const EventLists: FC<TEventListsProps> = ({ ev = events, cancelBooking }) => {
+const BookingEventLists: FC<TBookingEventListsProps> = ({
+  myBookings,
+  children
+}) => {
   return (
     <div className='w-4/5 mx-auto text-slate-700 flex flex-col justify-center items-center'>
       {/* Event Lists container */}
+      {children}
       <div className='my-4'>
-        {events.map((event, index) => (
-          <div key={index} className='relative'>
-            <EventListItem event={event} />
-            {cancelBooking && (
-              <button
-                onClick={() => cancelBooking(event.id)}
-                className='text-red-600 border-2 border-red-600 px-2 relative bottom-3 rounded-md hover:text-white hover:bg-red-600 transition duration-200 ease-linear'
-              >
-                Cancel booking
-              </button>
-            )}
-          </div>
+        {myBookings.map((booking, index) => (
+          <BookingEventListItem key={index} booking={booking} />
         ))}
       </div>
     </div>
   );
 };
 
-export default EventLists;
+export default BookingEventLists;

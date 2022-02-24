@@ -1,115 +1,22 @@
-import EventDetail from 'components/eventsPage/eventDetail';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
-import { NextPage } from 'next';
+import { MonthEnum } from 'enums/monthEnum';
 import Link from 'next/link';
-import { useState } from 'react';
+import { TEventData } from 'pages/events/[eventId]';
+import { FC, useState } from 'react';
 import { MdClose } from 'react-icons/md';
+import { dateFormatter } from 'utils/dateFormatter';
 
-export type TEventData = {
-  id: number;
-  name: string;
-  description: string;
-  city: string;
-  state: string;
-  country: string;
-  venue: string;
-  category: string;
-  organization: {
-    id: number;
-    name: string;
-    description: string;
-    contactNo: string;
-    email: string;
-    photo: string;
-  };
-  photos: {
-    id: number;
-    photo: string;
-  }[];
-  timings: {
-    id: number;
-    date: Date;
-    startTime: string;
-    endTime: string;
-  }[];
-  prices: {
-    id: number;
-    price: number;
-    currency: string;
-    maxLimit: number;
-    sold: number;
-  }[];
-  reviews: {
-    id: number;
-    description: string;
-    star: number;
-    user: {
-      id: number;
-      username: string;
-    };
-  }[];
+type TEventDetailProps = {
+  event: TEventData;
 };
 
-const eventData: TEventData = {
-  id: 101,
-  name: 'test',
-  description: 'test',
-  city: 'surat',
-  state: 'gujarat',
-  country: 'India',
-  venue: 'city light',
-  category: 'food',
-  organization: {
-    id: 201,
-    name: 'org test',
-    description: 'org desc',
-    contactNo: '1234567890',
-    email: 'test@sample.com',
-    photo: '/images/event-pic-1.jpg'
-  },
-  photos: [
-    {
-      id: 301,
-      photo: '/images/event-pic-2.jpg'
-    }
-  ],
-  timings: [
-    {
-      id: 401,
-      date: new Date(),
-      startTime: '14:00',
-      endTime: '23:00'
-    }
-  ],
-  prices: [
-    {
-      id: 501,
-      price: 299,
-      currency: 'INR',
-      maxLimit: 100,
-      sold: 20
-    }
-  ],
-  reviews: [
-    {
-      id: 601,
-      description: 'nice',
-      star: 25,
-      user: {
-        id: 1,
-        username: 'hello world'
-      }
-    }
-  ]
-};
+const EventDetail: FC<TEventDetailProps> = ({ event }) => {
+  const { organization, photos, prices, timings, reviews } = event;
 
-const EventDetailPage: NextPage = () => {
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
   const [showOrganizationPopUp, setShowOrganizationPopUp] =
     useState<boolean>(false);
-
-  return <EventDetail event={eventData} />;
 
   return (
     <>
@@ -118,41 +25,40 @@ const EventDetailPage: NextPage = () => {
         {/* column container */}
         <div className='flex flex-col w-full'>
           {/* 1st row container */}
-          <div className='flex flex-row flex-wrap'>
+          <div className='flex flex-col lg:flex-row flex-wrap'>
             {/* Left side Img container */}
-            <div className='w-4/6 h-3/4 object-cover overflow-hidden'>
-              <img src='/images/event-pic-1.jpg' alt='test-image' />
+            <div className='w-full lg:w-4/6 h-3/4 object-cover overflow-hidden'>
+              <img src={photos[0].photo} alt={event.name} />
             </div>
             {/* Right side Event name container */}
-            <div className='w-2/6 bg-gray-100'>
-              <section className='p-5 ml-2 h-full text-slate-700 relative'>
+            <div className='w-full lg:w-2/6 bg-gray-100'>
+              <section className='p-5 ml-2 h-full text-slate-700 '>
                 <div className='inline-block leading-4 text-center'>
-                  <p className='font-bold uppercase'>Feb</p>
-                  <p className='font-medium'>21</p>
+                  <p className='font-bold uppercase'>
+                    {MonthEnum[timings[0].date.getMonth()]}
+                  </p>
+                  <p className='font-medium'>{timings[0].date.getDate()}</p>
                 </div>
 
                 <div className='mt-5'>
                   <h2 className='text-xl font-bold text-slate-800'>
-                    Food event
+                    {event.name}
                   </h2>
                   <p className='mt-4 text-slate-600 font-medium'>
-                    By eventmanagement
+                    By {organization.name}
                   </p>
                 </div>
 
-                <div className='absolute bottom-5 text-slate-800'>Free</div>
+                <div className='mt-5 text-slate-800'>
+                  {prices[0].currency} {prices[0].price}
+                </div>
               </section>
             </div>
           </div>
 
           {/* 2nd row  Register button container */}
-          <div className='w-full text-right border-b-2 py-3'>
-            <div className='inline-block w-2/6 text-center'>
-              {/* <Link href='/events/123/order'>
-                <a className='inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 bg-green-700 text-white hover:bg-green-600 transition duration-200 ease-linear'>
-                  Register
-                </a>
-              </Link> */}
+          <div className='w-full lg:text-right border-b-2 py-3'>
+            <div className='inline-block w-full lg:w-2/6 text-center'>
               <button
                 className='inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 bg-green-700 text-white hover:bg-green-600 transition duration-200 ease-linear'
                 onClick={() => setShowRegisterModal(true)}
@@ -163,35 +69,28 @@ const EventDetailPage: NextPage = () => {
           </div>
 
           {/* 3rd row container */}
-          <div className='h-fit flex flex-row flex-wrap mt-9'>
+          <div className='h-fit flex flex-col lg:flex-row flex-wrap mt-9'>
             {/* Left side Description container */}
-            <div className='w-4/6'>
+            <div className='w-full lg:w-4/6'>
               <section className='mx-4 pt-5 px-8'>
                 <h2 className='text-slate-900 font-semibold mb-2'>
                   Description
                 </h2>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                  Optio veniam distinctio obcaecati minima. Aspernatur aperiam
-                  molestias repellendus? Ut animi sunt veniam, tempora harum
-                  iste officiis perferendis quis, dignissimos mollitia placeat.
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Cupiditate fugit voluptate quis? Voluptatibus aut accusamus
-                  dolor quas nam, pariatur, in ab aliquam et a rerum ad sit, non
-                  minima fuga.
-                </p>
+                <p>{event.description}</p>
               </section>
             </div>
             {/* Right side Date & time and location container */}
-            <div className='w-2/6'>
-              <div className='mx-2 pt-5 px-5 pb-5'>
+            <div className='w-full lg:w-2/6'>
+              <div className='mx-4 px-8 lg:mx-2 pt-5 lg:px-5 pb-5'>
                 <section>
                   <h2 className='text-slate-900 font-semibold mb-2'>
                     Date and Time
                   </h2>
                   <div className='leading-5 text-slate-900'>
-                    <p>Fri, March 11, 2022</p>
-                    <p>8:00 PM – 9:00 PM IST</p>
+                    <p>{dateFormatter(timings[0].date)}</p>
+                    <p>
+                      {timings[0].startTime} - {timings[0].endTime}
+                    </p>
                   </div>
                 </section>
                 <div className='my-10'>
@@ -200,9 +99,11 @@ const EventDetailPage: NextPage = () => {
                     className='border-2 border-slate-300 bg-slate-50 py-3 px-2 w-full hover:cursor-pointer focus:border-blue-600 text-slate-900'
                   >
                     <option value=''>Select a different date</option>
-                    <option value=''>Fri Mar 11 (8:00 PM)</option>
-                    <option value=''>Sun Feb 27 (9:00 PM)</option>
-                    <option value=''>Sun Mar 06 (7:00 PM)</option>
+                    {timings.map((timing) => (
+                      <option key={timing.id} value={timing.id}>
+                        {dateFormatter(timing.date)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -212,18 +113,22 @@ const EventDetailPage: NextPage = () => {
                     className='border-2 border-slate-300 bg-slate-50 py-3 px-2 w-full hover:cursor-pointer focus:border-blue-600 text-slate-900'
                   >
                     <option value=''>Select a different price plan</option>
-                    <option value=''>199 INR</option>
-                    <option value=''>299 INR</option>
-                    <option value=''>399 INR</option>
+                    {prices.map((price) => (
+                      <option key={price.id} value={price.id}>
+                        {price.currency} {price.price}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <section className='text-slate-900'>
                   <h2 className='font-semibold'>Location</h2>
                   <div className='leading-5 mt-2'>
-                    <p>Event Host</p>
-                    <p>Surat</p>
-                    <p>Surat, Gujarat</p>
+                    <p>{event.venue}</p>
+                    <p>
+                      {event.city}, {event.state}
+                    </p>
+                    <p>{event.country}</p>
                   </div>
                 </section>
               </div>
@@ -234,7 +139,7 @@ const EventDetailPage: NextPage = () => {
           <div className='w-full px-12 py-5 border-b-2'>
             <h2 className='text-slate-900 font-semibold mb-2'>Tags</h2>
             <p className='inline-block px-2 border-2 border-slate-400 rounded-2xl'>
-              Food
+              {event.category}
             </p>
           </div>
 
@@ -243,13 +148,13 @@ const EventDetailPage: NextPage = () => {
             <section>
               <figure className='flex justify-center items-start'>
                 <img
-                  src='/images/event-pic-1.jpg'
-                  alt=''
+                  src={organization.photo}
+                  alt={organization.name}
                   className='w-[120px] h-[120px] rounded-full object-cover'
                 />
               </figure>
               <h2 className='mt-2 text-slate-900 text-center'>
-                Organization Name
+                {organization.name}
               </h2>
               <div className='text-center mt-1'>
                 <button
@@ -263,7 +168,6 @@ const EventDetailPage: NextPage = () => {
           </div>
         </div>
       </div>
-
       {showRegisterModal && (
         <Modal>
           {/* Modal container */}
@@ -272,9 +176,10 @@ const EventDetailPage: NextPage = () => {
               {/* Left side modal container */}
               <div className=''>
                 <section className=' px-4 py-2 text-center border-b-2'>
-                  <h2 className='text-xl font-bold'>Event Name</h2>
+                  <h2 className='text-xl font-bold'>{event.name}</h2>
                   <p className='text-sm font-semibold'>
-                    Sun, Mar 13, 2022 2:00Pm - 3:00PM IST
+                    {dateFormatter(timings[0].date)} {timings[0].startTime} -{' '}
+                    {timings[0].endTime}
                   </p>
                 </section>
 
@@ -284,9 +189,11 @@ const EventDetailPage: NextPage = () => {
                     name='selectPrice'
                     className='border-2 border-slate-300 bg-slate-50 p-1 w-52 hover:cursor-pointer focus:border-blue-600 text-slate-900'
                   >
-                    <option value=''>199 INR</option>
-                    <option value=''>299 INR</option>
-                    <option value=''>399 INR</option>
+                    {prices.map((price) => (
+                      <option key={price.id} value={price.id}>
+                        {price.currency} {price.price}
+                      </option>
+                    ))}
                   </select>
                 </section>
 
@@ -344,14 +251,14 @@ const EventDetailPage: NextPage = () => {
         </Modal>
       )}
 
-      {/* {showOrganizationPopUp && (
+      {showOrganizationPopUp && (
         <OrganizationContactPopUp
-
+          orgDetail={organization}
           closeOrganizationContactPopUp={() => setShowOrganizationPopUp(false)}
         />
-      )} */}
+      )}
     </>
   );
 };
 
-export default EventDetailPage;
+export default EventDetail;

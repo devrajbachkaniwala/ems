@@ -143,7 +143,7 @@ const Login: NextPage = () => {
   };
 
   return (
-    <section className='h-[90vh] flex justify-center items-center'>
+    <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
       <form onSubmit={handleLogin} className='form'>
         <h2 className='form-heading'>Login</h2>
         {errMsg && <span className='input-error'>{errMsg}</span>}

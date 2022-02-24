@@ -1,12 +1,19 @@
-import userService from "@/services/userService";
-import { NextPage } from "next";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import { ChangeEvent, FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
-import { UserValidation } from "../class/UserValidation";
-import { TRegisterUser, TUser } from "../types/user";
+import userService from '@/services/userService';
+import { NextPage } from 'next';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import {
+  ChangeEvent,
+  FormEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
+import { UserValidation } from '../class/UserValidation';
+import { TRegisterUser, TUser } from '../types/user';
 import { FaPlusCircle, FaRegPlusSquare } from 'react-icons/fa';
-import Link from "next/link";
+import Link from 'next/link';
 
 type TFormValues = TRegisterUser & { confirmPassword: string };
 
@@ -20,20 +27,20 @@ type TFormErrors = {
 };
 
 const initialFormValues: TFormValues = {
-  username: "",
-  fullName: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  userPhoto: null,
+  username: '',
+  fullName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  userPhoto: null
 };
 
 const imageValidator = (imgFile: File): boolean => {
-  if (!imgFile.type.startsWith("image/")) {
-    throw new Error("File should be an image");
+  if (!imgFile.type.startsWith('image/')) {
+    throw new Error('File should be an image');
   }
   if (imgFile.size > 2_097_152) {
-    throw new Error("Image size should be less than 2MB");
+    throw new Error('Image size should be less than 2MB');
   }
   return true;
 };
@@ -53,7 +60,7 @@ const Register: NextPage = () => {
     reader.onload = () => {
       setFormValues({
         ...formValues,
-        userPhoto: reader.result,
+        userPhoto: reader.result
       });
     };
   };
@@ -62,13 +69,13 @@ const Register: NextPage = () => {
     try {
       setFormValues({
         ...formValues,
-        userPhoto: null,
+        userPhoto: null
       });
       if (!e.target.files?.length) {
         setIsSubmit(true);
         setFormErrors({
           ...formErrors,
-          userPhoto: null,
+          userPhoto: null
         });
         return;
       }
@@ -80,7 +87,7 @@ const Register: NextPage = () => {
       if (isValidImg) {
         setFormErrors({
           ...formErrors,
-          userPhoto: null,
+          userPhoto: null
         });
       }
       setIsSubmit(true);
@@ -88,7 +95,7 @@ const Register: NextPage = () => {
     } catch (err: any) {
       setFormErrors({
         ...formErrors,
-        userPhoto: err.message,
+        userPhoto: err.message
       });
       setIsSubmit(false);
     }
@@ -96,7 +103,7 @@ const Register: NextPage = () => {
 
   const onImgClick = (e: MouseEvent<HTMLInputElement>): void => {
     imgRef.current?.click();
-  }
+  };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, [e.target.name]: e.target.value });
@@ -185,17 +192,17 @@ const Register: NextPage = () => {
       const isValidCredentials: boolean = await validate();
 
       if (!isValidCredentials) {
-        console.log("error");
+        console.log('error');
         return;
       }
 
       const res: TUser = await userService.registerUser(formValues);
 
-      console.log("success");
+      console.log('success');
       console.log(res);
       setErrMsg(null);
 
-      router.push("/login");
+      router.push('/login');
     } catch (err: any) {
       setErrMsg(err.message);
     }
@@ -208,138 +215,131 @@ const Register: NextPage = () => {
     ); */
 
   return (
-    <section className="h-[90vh] flex justify-center items-center">
-      <form className="form" onSubmit={handleSubmit}>
-      <h2 className='form-heading' >Register</h2>
-        {errMsg && (
-          <span className='input-error'>{errMsg}</span>
-        )}
+    <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
+      <form className='form' onSubmit={handleSubmit}>
+        <h2 className='form-heading'>Register</h2>
+        {errMsg && <span className='input-error'>{errMsg}</span>}
 
         {formErrors.userPhoto && (
-          <span className='input-error'>
-            {formErrors.userPhoto}
-          </span>
+          <span className='input-error'>{formErrors.userPhoto}</span>
         )}
 
         <div className='flex justify-center items-center mb-5'>
-          <div className="h-[120px] w-[120px] rounded-full bg-slate-200 relative hover:cursor-pointer border-2 border-slate-400 hover:border-slate-700 text-slate-400 hover:text-slate-700" onClick={onImgClick}>
-          { formValues.userPhoto && <Image
-            src={`${formValues.userPhoto}`}
-            alt="userPhoto"
-            width={120}
-            height={120}
-            className="rounded-full w-36 object-cover"
-          />}
-          <FaRegPlusSquare className='absolute text-2xl text-inherit right-5 bottom-3 z-10' />
+          <div
+            className='h-[120px] w-[120px] rounded-full bg-slate-200 relative hover:cursor-pointer border-2 border-slate-400 hover:border-slate-700 text-slate-400 hover:text-slate-700'
+            onClick={onImgClick}
+          >
+            {formValues.userPhoto && (
+              <Image
+                src={`${formValues.userPhoto}`}
+                alt='userPhoto'
+                width={120}
+                height={120}
+                className='rounded-full w-36 object-cover'
+              />
+            )}
+            <FaRegPlusSquare className='absolute text-2xl text-inherit right-5 bottom-3 z-10' />
           </div>
           <input
-            type="file"
-            name="userPhoto"
+            type='file'
+            name='userPhoto'
             onChange={handleUserPhoto}
             className='hidden'
             ref={imgRef}
           />
         </div>
 
-
         {formErrors.username && (
-            <span className='input-error'>
-              {formErrors.username}
-            </span>
+          <span className='input-error'>{formErrors.username}</span>
         )}
-        <div className="form-group">
-          <label htmlFor="username" className="">
+        <div className='form-group'>
+          <label htmlFor='username' className=''>
             Username
           </label>
-          
+
           <input
-            id="username"
-            type="text"
-            name="username"
+            id='username'
+            type='text'
+            name='username'
             value={formValues.username}
             onChange={handleChange}
-            placeholder="Enter username"
+            placeholder='Enter username'
           />
         </div>
 
-
         {formErrors.fullName && (
-            <span className='input-error'>
-              {formErrors.fullName}
-            </span>
+          <span className='input-error'>{formErrors.fullName}</span>
         )}
-        <div className="form-group">
-          <label htmlFor="fullName">Full Name</label>
-          
+        <div className='form-group'>
+          <label htmlFor='fullName'>Full Name</label>
+
           <input
-            id="fullName"
-            type="text"
-            name="fullName"
+            id='fullName'
+            type='text'
+            name='fullName'
             value={formValues.fullName}
             onChange={handleChange}
-            placeholder="Enter full name"
+            placeholder='Enter full name'
           />
         </div>
 
         {formErrors.email && (
-            <span className='input-error'>
-              {formErrors.email}
-            </span>
+          <span className='input-error'>{formErrors.email}</span>
         )}
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          
+        <div className='form-group'>
+          <label htmlFor='email'>Email</label>
+
           <input
-            id="email"
-            type="email"
-            name="email"
+            id='email'
+            type='email'
+            name='email'
             value={formValues.email}
             onChange={handleChange}
-            placeholder="Enter email"
+            placeholder='Enter email'
           />
         </div>
 
         {formErrors.password && (
-            <span className='input-error'>
-              {formErrors.password}
-            </span>
+          <span className='input-error'>{formErrors.password}</span>
         )}
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          
+        <div className='form-group'>
+          <label htmlFor='password'>Password</label>
+
           <input
-            id="password"
-            type="password"
-            name="password"
+            id='password'
+            type='password'
+            name='password'
             value={formValues.password}
             onChange={handleChange}
-            placeholder="Enter password"
+            placeholder='Enter password'
           />
         </div>
 
         {formErrors.confirmPassword && (
-            <span className='input-error'>
-              {formErrors.confirmPassword}
-            </span>
+          <span className='input-error'>{formErrors.confirmPassword}</span>
         )}
 
-        <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password</label>
+        <div className='form-group'>
+          <label htmlFor='confirmPassword'>Confirm Password</label>
           <input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
+            id='confirmPassword'
+            type='password'
+            name='confirmPassword'
             value={formValues.confirmPassword}
             onChange={handleChange}
-            placeholder="Enter confirm password"
+            placeholder='Enter confirm password'
           />
         </div>
 
-        <button type="submit" className='btn mt-2'>Register</button>
+        <button type='submit' className='btn mt-2'>
+          Register
+        </button>
 
         <div className='text-center'>
           <Link href={'/login'}>
-            <a className='text-slate-700 hover:text-blue-600 focus:outline-none'>Already have an account?</a>
+            <a className='text-slate-700 hover:text-blue-600 focus:outline-none'>
+              Already have an account?
+            </a>
           </Link>
         </div>
       </form>
