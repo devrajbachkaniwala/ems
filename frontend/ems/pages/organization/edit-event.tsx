@@ -57,13 +57,15 @@ const initialEventState: TEvent = {
   category: ''
 };
 
-const CreateEventPage: NextPage = () => {
+const EditEventPage: NextPage = () => {
   const [priceForms, setPriceForms] = useState<TPrice[]>([initialPriceState]);
   const [timingForms, setTimingForms] = useState<TTiming[]>([
     initialTimingState
   ]);
   const [photoForms, setPhotoForms] = useState<TPhoto[]>([initialPhotoState]);
   const [eventForm, setEventForm] = useState<TEvent>(initialEventState);
+
+  const [isFieldDisabled, setIsFieldDisabled] = useState<boolean>(true);
 
   const handlePriceChange = (
     index: number,
@@ -185,7 +187,7 @@ const CreateEventPage: NextPage = () => {
     <div className='min-h-[80vh]  text-slate-700'>
       <div className='w-full md:w-4/5 h-full mb-4 mx-auto'>
         <h2 className='text-center text-2xl font-semibold my-5'>
-          Create an event
+          Update an event
         </h2>
         <div className='mx-2'>
           <form name='event' id='eventForm' onSubmit={handleSubmit}>
@@ -531,11 +533,30 @@ const CreateEventPage: NextPage = () => {
 
           <div className='w-[80%] md:w-[50%] flex justify-center'>
             <button
+              type='button'
+              className={`px-2 py-1 mr-2 text-blue-600 border-2 rounded-md border-blue-600 transition duration-200 ease-linear ${
+                !isFieldDisabled
+                  ? 'cursor-not-allowed'
+                  : 'hover:text-white hover:bg-blue-600'
+              }`}
+              onClick={() => {
+                setIsFieldDisabled(false);
+              }}
+            >
+              Edit
+            </button>
+            <button
               type='submit'
-              className='px-2 py-1 text-blue-600 border-2 rounded-md border-blue-600 hover:text-white hover:bg-blue-600 transition duration-200 ease-linear'
+              className='px-2 py-1 mr-2 text-green-700 border-2 rounded-md border-green-700 hover:text-white hover:bg-green-700 transition duration-200 ease-linear'
               form='eventForm'
             >
-              Create
+              Save
+            </button>
+            <button
+              type='button'
+              className='px-2 py-1 text-red-600 border-2 rounded-md border-red-600 hover:text-white hover:bg-red-600 transition duration-200 ease-linear'
+            >
+              Delete
             </button>
           </div>
         </div>
@@ -544,4 +565,4 @@ const CreateEventPage: NextPage = () => {
   );
 };
 
-export default CreateEventPage;
+export default EditEventPage;

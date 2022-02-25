@@ -1,4 +1,5 @@
 import { MdDelete } from 'react-icons/md';
+import { FaTrashAlt } from 'react-icons/fa';
 
 type TTeamMember = {
   id: number;
@@ -112,7 +113,7 @@ const TeamMembers = () => {
                 <p className='w-[20%] text-center'>{teamMember.user.email}</p>
                 <button className='w-[20%] py-1 text-red-600 border-2 rounded-md border-red-600 hover:text-white hover:bg-red-600 flex justify-center items-center transition duration-200 ease-linear'>
                   {' '}
-                  <MdDelete className='text-lg mr-1' /> Remove
+                  <FaTrashAlt className='text-lg mr-1' /> Remove
                 </button>
               </article>
             );
