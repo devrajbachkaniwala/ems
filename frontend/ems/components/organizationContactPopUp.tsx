@@ -1,3 +1,4 @@
+import { EventDetail_eventById_organization } from '@/services/eventService/__generated__/EventDetail';
 import { FC } from 'react';
 import { MdClose } from 'react-icons/md';
 import Modal from './modal';
@@ -11,7 +12,7 @@ type TOrgDetail = {
 };
 
 type TOrganizationContactPopUp = {
-  orgDetail: TOrgDetail;
+  orgDetail: EventDetail_eventById_organization;
   closeOrganizationContactPopUp: () => void;
 };
 

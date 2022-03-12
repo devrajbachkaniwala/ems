@@ -4,6 +4,7 @@ import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { MdAdd, MdAddCircleOutline, MdImage } from 'react-icons/md';
 import { HiOutlineMinusCircle } from 'react-icons/hi';
 import { imageValidator } from 'utils/imageValidator';
+import { FaTrashAlt } from 'react-icons/fa';
 
 type TPrice = {
   price: number;
@@ -181,6 +182,7 @@ const EditEventPage: NextPage = () => {
     e.preventDefault();
     console.log(priceForms);
     console.log(timingForms);
+    setIsFieldDisabled(true);
   };
 
   return (
@@ -201,8 +203,13 @@ const EditEventPage: NextPage = () => {
                 name='name'
                 value={eventForm.name}
                 placeholder='Enter event name'
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
                 onChange={handleEventFormValueChange}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -216,7 +223,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.description}
                 placeholder='Enter event description'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -230,7 +242,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.city}
                 placeholder='Enter event city'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -244,7 +261,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.state}
                 placeholder='Enter event state'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -258,7 +280,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.country}
                 placeholder='Enter event country'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -271,7 +298,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.venue}
                 placeholder='Enter event venue'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
@@ -285,7 +317,12 @@ const EditEventPage: NextPage = () => {
                 value={eventForm.category}
                 placeholder='Enter event category'
                 onChange={handleEventFormValueChange}
-                className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                }`}
+                disabled={isFieldDisabled}
               />
             </div>
             {/* <button>Submit</button> */}
@@ -301,7 +338,11 @@ const EditEventPage: NextPage = () => {
                       {index ? (
                         <button
                           type='button'
-                          className='ml-2'
+                          className={`ml-2 text-red-600 ${
+                            isFieldDisabled
+                              ? 'cursor-not-allowed'
+                              : 'hover:text-red-700'
+                          }`}
                           onClick={() => {
                             setPriceForms((prevState) => {
                               return prevState.filter((price, idx) => {
@@ -309,6 +350,7 @@ const EditEventPage: NextPage = () => {
                               });
                             });
                           }}
+                          disabled={isFieldDisabled}
                         >
                           <HiOutlineMinusCircle className='text-3xl' />
                         </button>
@@ -326,7 +368,12 @@ const EditEventPage: NextPage = () => {
                         id='price'
                         value={price.price}
                         onChange={(event) => handlePriceChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                     <div className='w-full flex justify-between items-center mb-4'>
@@ -339,7 +386,12 @@ const EditEventPage: NextPage = () => {
                         id='currency'
                         value={price.currency}
                         onChange={(event) => handlePriceChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                     <div className='w-full flex justify-between items-center mb-4'>
@@ -352,7 +404,12 @@ const EditEventPage: NextPage = () => {
                         id='maxLimit'
                         value={price.maxLimit}
                         onChange={(event) => handlePriceChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                   </form>
@@ -368,8 +425,13 @@ const EditEventPage: NextPage = () => {
                     initialPriceState
                   ]);
                 }}
-                className='ml-2'
+                className={`ml-2 text-green-700  ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:text-green-800'
+                }`}
                 title='Add another price plan'
+                disabled={isFieldDisabled}
               >
                 <MdAddCircleOutline className='text-3xl' />
               </button>
@@ -386,7 +448,11 @@ const EditEventPage: NextPage = () => {
                       {index ? (
                         <button
                           type='button'
-                          className='ml-2'
+                          className={`ml-2 text-red-600 ${
+                            isFieldDisabled
+                              ? 'cursor-not-allowed'
+                              : 'hover:text-red-700'
+                          }`}
                           onClick={() => {
                             setTimingForms((prevState) => {
                               return prevState.filter((timing, idx) => {
@@ -394,6 +460,7 @@ const EditEventPage: NextPage = () => {
                               });
                             });
                           }}
+                          disabled={isFieldDisabled}
                         >
                           <HiOutlineMinusCircle className='text-3xl' />
                         </button>
@@ -411,7 +478,12 @@ const EditEventPage: NextPage = () => {
                         name='date'
                         value={timing.date}
                         onChange={(event) => handleTimingChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                     <div className='w-full flex justify-between items-center mb-4'>
@@ -424,7 +496,12 @@ const EditEventPage: NextPage = () => {
                         name='startTime'
                         value={timing.startTime}
                         onChange={(event) => handleTimingChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                     <div className='w-full flex justify-between items-center mb-4'>
@@ -437,7 +514,12 @@ const EditEventPage: NextPage = () => {
                         name='endTime'
                         value={timing.endTime}
                         onChange={(event) => handleTimingChange(index, event)}
-                        className='w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md hover:border-slate-700 focus:outline-none focus:border-slate-700 transition duration-200 ease-linear'
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                   </form>
@@ -453,8 +535,13 @@ const EditEventPage: NextPage = () => {
                     initialTimingState
                   ]);
                 }}
-                className='ml-2'
+                className={`ml-2 text-green-700 ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:text-green-800'
+                }`}
                 title='Add another Timing'
+                disabled={isFieldDisabled}
               >
                 <MdAddCircleOutline className='text-3xl' />
               </button>
@@ -471,7 +558,11 @@ const EditEventPage: NextPage = () => {
                       {index ? (
                         <button
                           type='button'
-                          className='ml-2'
+                          className={`ml-2 text-red-600 ${
+                            isFieldDisabled
+                              ? 'cursor-not-allowed'
+                              : 'hover:text-red-700'
+                          }`}
                           onClick={() => {
                             setPhotoForms((prevState) => {
                               return prevState.filter((photo, idx) => {
@@ -479,6 +570,7 @@ const EditEventPage: NextPage = () => {
                               });
                             });
                           }}
+                          disabled={isFieldDisabled}
                         >
                           <HiOutlineMinusCircle className='text-3xl' />
                         </button>
@@ -506,7 +598,12 @@ const EditEventPage: NextPage = () => {
                         type='file'
                         name='eventPhoto'
                         onChange={(event) => handlePhotoChange(index, event)}
-                        className='opacity-0 h-[240px] w-full absolute top-0 right-0 bottom-0 left-0 hover:cursor-pointer'
+                        className={`opacity-0 h-[240px] w-full absolute top-0 right-0 bottom-0 left-0 ${
+                          isFieldDisabled
+                            ? 'cursor-not-allowed'
+                            : 'hover:cursor-pointer'
+                        }`}
+                        disabled={isFieldDisabled}
                       />
                     </div>
                   </form>
@@ -523,8 +620,13 @@ const EditEventPage: NextPage = () => {
                     initialPhotoState
                   ]);
                 }}
-                className='ml-2'
+                className={`ml-2 text-green-700 ${
+                  isFieldDisabled
+                    ? 'cursor-not-allowed'
+                    : 'hover:text-green-800'
+                }`}
                 title='Add another Photo'
+                disabled={isFieldDisabled}
               >
                 <MdAddCircleOutline className='text-3xl' />
               </button>
@@ -534,7 +636,7 @@ const EditEventPage: NextPage = () => {
           <div className='w-[80%] md:w-[50%] flex justify-center'>
             <button
               type='button'
-              className={`px-2 py-1 mr-2 text-blue-600 border-2 rounded-md border-blue-600 transition duration-200 ease-linear ${
+              className={`px-2 py-1 mr-2 w-[50%] text-blue-600 border-2 rounded-md border-blue-600 transition duration-200 ease-linear ${
                 !isFieldDisabled
                   ? 'cursor-not-allowed'
                   : 'hover:text-white hover:bg-blue-600'
@@ -542,20 +644,27 @@ const EditEventPage: NextPage = () => {
               onClick={() => {
                 setIsFieldDisabled(false);
               }}
+              disabled={!isFieldDisabled}
             >
               Edit
             </button>
             <button
               type='submit'
-              className='px-2 py-1 mr-2 text-green-700 border-2 rounded-md border-green-700 hover:text-white hover:bg-green-700 transition duration-200 ease-linear'
+              className={`px-2 py-1 mr-2 w-[50%] text-green-700 border-2 rounded-md border-green-700 transition duration-200 ease-linear ${
+                isFieldDisabled
+                  ? 'cursor-not-allowed'
+                  : 'hover:text-white hover:bg-green-700'
+              }`}
               form='eventForm'
+              disabled={isFieldDisabled}
             >
               Save
             </button>
             <button
               type='button'
-              className='px-2 py-1 text-red-600 border-2 rounded-md border-red-600 hover:text-white hover:bg-red-600 transition duration-200 ease-linear'
+              className='px-2 py-1 w-[50%] text-red-600 border-2 rounded-md border-red-600 flex justify-center items-center hover:text-white hover:bg-red-600 transition duration-200 ease-linear'
             >
+              <FaTrashAlt className='mr-1' />
               Delete
             </button>
           </div>

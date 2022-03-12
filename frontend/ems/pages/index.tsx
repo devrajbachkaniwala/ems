@@ -1,10 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
-import type { NextPage } from 'next';
+import type {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+  NextPage
+} from 'next';
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import eventService from '@/services/eventService';
 import { apolloClient } from 'app/graphql';
-import userService from '@/services/userService';
+import userService from '@/services/authService';
 import tokenService from '@/services/tokenService';
 import { setUserState } from 'app/features/user/userSlice';
 import tokenClass from 'class/Token';
@@ -15,33 +20,25 @@ import Image from 'next/image';
 import Footer from 'components/footer';
 import eventStyles from 'styles/event.module.css';
 import Link from 'next/link';
+import { EventList } from '@/services/eventService/__generated__/EventList';
+import { dateFormatter } from 'utils/dateFormatter';
+import { store } from 'app/stores/store';
+import { observer } from 'mobx-react-lite';
+import { isFreeEvent } from 'utils/isFreeEvent';
 
-const getUser = async () => {
-  const refreshToken = localStorage.getItem('auth');
-  const res = await fetchAccessToken(refreshToken!);
-  const user = await userService.getUserProfile();
-  return user;
+type THomeProps = {
+  events: EventList['events'];
 };
 
-const fetchAccessToken = async (refreshtoken: string) => {
-  const res = await tokenService.getNewAccessToken(refreshtoken);
-  tokenClass.setAccessToken(res.accessToken);
-  //setAuthorizationHeader(res.accessToken);
-  return res;
-};
-
-const Home: NextPage = () => {
-  const user = useAppSelector((state) => state.user.value);
-  const dispatch = useAppDispatch();
-
-  const handleLogout = async () => {
+const Home: NextPage<THomeProps> = ({ events }) => {
+  /* const handleLogout = async () => {
     const res = await axios.post(`${Env.authUrl}/logout`, null, {
       withCredentials: true
     });
     console.log(res.status);
-  };
+  }; */
 
-  const onClick = async () => {
+  /* const onClick = async () => {
     try {
       //const res = await tokenService.getNewAccessToken(tokenClass.getRefreshTokenFromLocalStorage());
       //setAuthorizationHeader(res.accessToken);
@@ -50,7 +47,7 @@ const Home: NextPage = () => {
     } catch (err: any) {
       console.log(err.message);
     }
-  };
+  }; */
 
   return (
     <>
@@ -80,111 +77,57 @@ const Home: NextPage = () => {
 
       <main className='sm:mx-3 my-14 sm:px-7'>
         <div className='h-fit flex flex-row flex-wrap justify-center lg:justify-start'>
-          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
-            <figure>
-              <img
-                src='/images/landing-page-photo.jpg'
-                alt='test-photo'
-                className='w-full h-[120px] object-cover object-center'
-              />
-            </figure>
-            <section className='mt-4 px-3 text-gray-700'>
-              <h2 className='text-xl font-bold'>Event Name</h2>
-              <p className='my-2 font-semibold'>Sat, Feb 19</p>
-              <div className='text-sm'>
-                <p>Surat, GJ</p>
-                <p>Free</p>
-              </div>
-            </section>
-            <footer className='px-3 mb-3 absolute bottom-2'>
-              <h3>Host Name</h3>
-            </footer>
-          </article>
-
-          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
-            <figure>
-              <img
-                src='/images/landing-page-photo.jpg'
-                alt='test-photo'
-                className='w-full h-[120px] object-cover object-center'
-              />
-            </figure>
-            <section className='mt-4 px-3 text-gray-700'>
-              <h2 className='text-xl font-bold'>Event Name</h2>
-              <p className='my-2 font-semibold'>Sat, Feb 19</p>
-              <div className='text-sm'>
-                <p>Surat, GJ</p>
-                <p>Free</p>
-              </div>
-            </section>
-            <footer className='px-3 mb-3 absolute bottom-2'>
-              <h3>Host Name</h3>
-            </footer>
-          </article>
-
-          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
-            <figure>
-              <img
-                src='/images/landing-page-photo.jpg'
-                alt='test-photo'
-                className='w-full h-[120px] object-cover object-center'
-              />
-            </figure>
-            <section className='mt-4 px-3 text-gray-700'>
-              <h2 className='text-xl font-bold'>Event Name</h2>
-              <p className='my-2 font-semibold'>Sat, Feb 19</p>
-              <div className='text-sm'>
-                <p>Surat, GJ</p>
-                <p>Free</p>
-              </div>
-            </section>
-            <footer className='px-3 mb-3 absolute bottom-2'>
-              <h3>Host Name</h3>
-            </footer>
-          </article>
-
-          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
-            <figure>
-              <img
-                src='/images/landing-page-photo.jpg'
-                alt='test-photo'
-                className='w-full h-[120px] object-cover object-center'
-              />
-            </figure>
-            <section className='mt-4 px-3 text-gray-700'>
-              <h2 className='text-xl font-bold'>Event Name</h2>
-              <p className='my-2 font-semibold'>Sat, Feb 19</p>
-              <div className='text-sm'>
-                <p>Surat, GJ</p>
-                <p>Free</p>
-              </div>
-            </section>
-            <footer className='px-3 mb-3 absolute bottom-2'>
-              <h3>Host Name</h3>
-            </footer>
-          </article>
-
-          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
-            <figure>
-              <img
-                src='/images/landing-page-photo.jpg'
-                alt='test-photo'
-                className='w-full h-[120px] object-cover object-center'
-              />
-            </figure>
-            <section className='mt-4 px-3 text-gray-700'>
-              <h2 className='text-xl font-bold'>Event Name</h2>
-              <p className='my-2 font-semibold'>Sat, Feb 19</p>
-              <div className='text-sm'>
-                <p>Surat, GJ</p>
-                <p>Free</p>
-              </div>
-            </section>
-            <footer className='px-3 mb-3 absolute bottom-2'>
-              <h3>Host Name</h3>
-            </footer>
-          </article>
+          {events?.length ? (
+            <>
+              {events.map((event) => {
+                return (
+                  <div key={event.id}>
+                    {event.organization &&
+                      event.prices?.length &&
+                      event.photos?.length &&
+                      event.timings?.length && (
+                        <Link href={`/events/${event.id}`} passHref>
+                          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
+                            <figure>
+                              <img
+                                src={event.photos[0].photo}
+                                alt={event.name}
+                                className='w-full h-[120px] object-cover object-center'
+                              />
+                            </figure>
+                            <section className='mt-4 px-3 text-gray-700'>
+                              <h2 className='text-xl font-bold'>
+                                {event.name}
+                              </h2>
+                              <p className='my-2 font-semibold'>
+                                {dateFormatter(new Date(event.timings[0].date))}
+                              </p>
+                              <div className='text-sm'>
+                                <p>
+                                  {event.city}, {event.state}, {event.country}
+                                </p>
+                                <p>
+                                  {isFreeEvent(event.prices[0].price)
+                                    ? 'Free'
+                                    : `${event.prices[0].currency} ${event.prices[0].price}`}
+                                </p>
+                              </div>
+                            </section>
+                            <footer className='px-3 mb-3 absolute bottom-2'>
+                              <h3>{event.organization.name}</h3>
+                            </footer>
+                          </article>
+                        </Link>
+                      )}
+                  </div>
+                );
+              })}
+            </>
+          ) : (
+            <>No events</>
+          )}
         </div>
+
         <div className='text-center my-4'>
           <Link href='/events'>
             <a className='inline-block py-1 px-3 w-52 border-2 border-slate-300 hover:border-slate-500 hover:bg-slate-50 transition duration-200 ease-linear'>
@@ -197,4 +140,24 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default observer(Home);
+
+export const getServerSideProps: GetServerSideProps<{
+  events: EventList['events'];
+}> = async (ctx) => {
+  try {
+    const events = await eventService.getAllEvents();
+    return {
+      props: {
+        events: events.slice(0, 6)
+      }
+    };
+  } catch (err: any) {
+    console.log(err);
+    return {
+      props: {
+        events: null
+      }
+    };
+  }
+};

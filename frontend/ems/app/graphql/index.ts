@@ -60,35 +60,41 @@ const authMiddleware: ApolloLink = new ApolloLink(
 );
 
 const setAuth = new ApolloLink((operation, forward) => {
-  operation.setContext((req: any, prevCtx: any) => {
-    const accessToken = sessionStorage.getItem('aToken');
-    const refreshToken = localStorage.getItem('rToken');
-    console.log(`aToken: ${accessToken}`);
-    console.log(`rToken: ${refreshToken}`);
-    const curDate = Math.floor(Date.now() / 1000);
+  //console.log(operation.query.definitions[0].name.value);
+  if (typeof window !== 'undefined') {
+    operation.setContext((req: any, prevCtx: any) => {
+      const accessToken = sessionStorage.getItem('accessToken');
+      const refreshToken = localStorage.getItem('refreshToken');
+      console.log(`accessToken: ${accessToken}`);
+      console.log(`refreshToken: ${refreshToken}`);
+      const curDate = Math.floor(Date.now() / 1000);
 
-    if (accessToken) {
-      const isValid = verify(accessToken, Env.accessSalt);
-      if (typeof isValid !== 'string' && isValid.exp) {
-        if (isValid.exp > curDate) {
-          return {
-            headers: {
-              authorization: `Bearer ${accessToken}`
-            }
-          };
+      if (accessToken) {
+        const isValid = verify(accessToken, Env.accessSalt);
+        if (typeof isValid !== 'string' && isValid.exp) {
+          if (isValid.exp > curDate) {
+            console.log(isValid);
+            return {
+              ...prevCtx,
+              headers: {
+                authorization: `Bearer ${accessToken}`
+              }
+            };
+          }
         }
       }
-    }
-    if (refreshToken) {
-      return tokenService.getNewAccessToken(refreshToken).then((res) => {
-        return {
-          headers: {
-            authorization: `Bearer ${res.accessToken}`
-          }
-        };
-      });
-    }
-  });
+      if (refreshToken) {
+        return tokenService.getNewAccessToken(refreshToken).then((res) => {
+          return {
+            ...prevCtx,
+            headers: {
+              authorization: `Bearer ${res.accessToken}`
+            }
+          };
+        });
+      }
+    });
+  }
 
   return forward(operation);
 });

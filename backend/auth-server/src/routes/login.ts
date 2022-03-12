@@ -54,7 +54,8 @@ loginRoute.post('/', async (req: Request<null, null, ILoginUser>, res: Response)
     
         await RefreshToken.create({ refreshToken }).save();
 
-        // serializing httpOnly cookie
+/* 
+        // serializing httpOnly cookie to set refreshToken
         const serialized = serialize('authJwt', refreshToken, {
             httpOnly: true,
             secure: Env.nodeEnv !== 'development',
@@ -65,9 +66,10 @@ loginRoute.post('/', async (req: Request<null, null, ILoginUser>, res: Response)
 
         // setting headers to set cookie
         res.setHeader('Set-Cookie', serialized);
+         */
 
-        // Send json response containing jwt access token and jwt refresh token
-        res.status(200).json({ accessToken, tokenType: 'Bearer', expiresIn: '30m', refreshToken });
+        // Send json response containing jwt access token and refresh token 
+        res.status(200).json({ accessToken, refreshToken });
     } catch(err: any) {
         throw new Error(err);
     }

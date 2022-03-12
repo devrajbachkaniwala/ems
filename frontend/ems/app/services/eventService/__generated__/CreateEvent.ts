@@ -3,11 +3,13 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
+import { AddEventInput } from "./../../../../__generated__/globalTypes";
+
 // ====================================================
-// GraphQL query operation: EventsPage
+// GraphQL mutation operation: CreateEvent
 // ====================================================
 
-export interface EventsPage_events {
+export interface CreateEvent_createEvent {
   __typename: "Event";
   id: string;
   name: string;
@@ -17,11 +19,12 @@ export interface EventsPage_events {
   country: string;
   venue: string;
   category: string;
-  createdAt: any;
-  modifiedAt: any;
-  geoLatLng: string;
 }
 
-export interface EventsPage {
-  events: EventsPage_events[] | null;
+export interface CreateEvent {
+  createEvent: CreateEvent_createEvent;
+}
+
+export interface CreateEventVariables {
+  data: AddEventInput;
 }

@@ -43,7 +43,7 @@ import cors from 'cors';
 
         // Allow cross origin
         app.use(cors({ 
-            origin: 'http://localhost:4000',
+            origin: ['http://localhost:4000', 'http://localhost:3001'],
             credentials: true 
         }));
         

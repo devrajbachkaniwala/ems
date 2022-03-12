@@ -6,8 +6,14 @@ import { apolloClient } from 'app/graphql';
 import { GET_USER_PROFILE } from './queries';
 import { ApolloQueryResult } from '@apollo/client';
 import { IUserProfile } from './types';
+import {
+  UpdateUserProfile,
+  UpdateUserProfileVariables
+} from './__generated__/UpdateUserProfile';
+import { UPDATE_USER_PROFILE } from './mutations';
+import { UpdateUserInput } from '__generated__/globalTypes';
 
-class UserService {
+class authService {
   async registerUser(user: TRegisterUser): Promise<TUser> {
     try {
       const res: AxiosResponse<TUser> = await axios.post<
@@ -54,7 +60,7 @@ class UserService {
       const res: ApolloQueryResult<IUserProfile> =
         await apolloClient.query<IUserProfile>({ query: GET_USER_PROFILE });
 
-      if (!res || !res.data) {
+      if (!res || !res.data || !res.data.user) {
         throw new Error('user not found');
       }
 
@@ -63,6 +69,25 @@ class UserService {
       throw err;
     }
   }
+
+  async updateUserProfile(
+    data: UpdateUserInput
+  ): Promise<UpdateUserProfile['updateUser']> {
+    try {
+      const res = await apolloClient.mutate<
+        UpdateUserProfile,
+        UpdateUserProfileVariables
+      >({ mutation: UPDATE_USER_PROFILE, variables: { data } });
+
+      if (!res || !res.data) {
+        throw new Error('user not found');
+      }
+
+      return res.data.updateUser;
+    } catch (err: any) {
+      throw err;
+    }
+  }
 }
 
-export default new UserService();
+export default new authService();

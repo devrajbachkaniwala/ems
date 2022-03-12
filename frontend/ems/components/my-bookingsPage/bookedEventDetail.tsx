@@ -1,17 +1,28 @@
+/* eslint-disable @next/next/no-img-element */
+import {
+  BookingDetail,
+  BookingDetail_bookingById
+} from '@/services/bookingService/__generated__/BookingDetail';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
 import { MonthEnum } from 'enums/monthEnum';
 import { WeekEnum } from 'enums/weekEnum';
 import Link from 'next/link';
-import { TMyBookings } from 'pages/my-bookings';
+import { TMyBooking } from 'pages/my-bookings';
 import { FC, useState } from 'react';
 import { MdClose } from 'react-icons/md';
+import { dateFormatter } from 'utils/dateFormatter';
+import { timeFormatter } from 'utils/timeFormatter';
 
 type TBookedEventDetail = {
-  booking?: TMyBookings | undefined;
+  booking: BookingDetail['bookingById'];
+  cancelBooking: (bookingId: string) => Promise<void>;
 };
 
-const BookedEventDetail: FC<TBookedEventDetail> = ({ booking }) => {
+const BookedEventDetail: FC<TBookedEventDetail> = ({
+  booking,
+  cancelBooking
+}) => {
   const [showOrganizationPopUp, setShowOrganizationPopUp] =
     useState<boolean>(false);
 
@@ -31,16 +42,22 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({ booking }) => {
           <div className='flex flex-col lg:flex-row flex-wrap'>
             {/* Left side Img container */}
             <div className='w-full lg:w-4/6 h-3/4 object-cover overflow-hidden'>
-              <img src={event.photos[0].photo} alt={event.name} />
+              {event.photos?.length ? (
+                <img src={event.photos[0].photo} alt={event.name} />
+              ) : (
+                <div>No image</div>
+              )}
             </div>
             {/* Right side Event name container */}
             <div className='w-full lg:w-2/6 bg-gray-100'>
               <section className='p-5 ml-2 h-full text-slate-700 '>
                 <div className='inline-block leading-4 text-center'>
                   <p className='font-bold uppercase'>
-                    {MonthEnum[timing.date.getMonth()]}
+                    {MonthEnum[new Date(timing.date).getMonth()]}
                   </p>
-                  <p className='font-medium'>{timing.date.getDate()}</p>
+                  <p className='font-medium'>
+                    {new Date(timing.date).getDate()}
+                  </p>
                 </div>
 
                 <div className='mt-5'>
@@ -69,9 +86,14 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({ booking }) => {
           <div className='w-full lg:text-right border-b-2 py-3'>
             <div className='inline-block w-full lg:w-2/6 text-center'>
               <button
+                type='button'
                 disabled={bookingItem.status === 'cancel'}
-                className='inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 text-red-600 border-2 border-red-600 hover:text-white hover:bg-red-600 transition duration-200 ease-linear'
-                onClick={() => console.log(`booking id: ${booking.id}`)}
+                className={`inline-block w-[90%] rounded-md mx-2 px-4 text-center py-1 text-red-600 border-2 border-red-600 transition duration-200 ease-linear ${
+                  bookingItem.status === 'cancel'
+                    ? 'cursor-not-allowed'
+                    : 'hover:text-white hover:bg-red-600'
+                }`}
+                onClick={() => cancelBooking(booking.id)}
               >
                 {bookingItem.status === 'cancel'
                   ? 'Canceled'
@@ -101,13 +123,12 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({ booking }) => {
                   <div className='leading-5 text-slate-900'>
                     <p>
                       {/* Fri, March 11, 2022 */}{' '}
-                      {`${WeekEnum[timing.date.getDay()]}, ${
-                        MonthEnum[timing.date.getMonth()]
-                      } ${timing.date.getDate()}, ${timing.date.getFullYear()}`}
+                      {dateFormatter(new Date(timing.date))}
                     </p>
                     <p>
-                      {/* 8:00 PM – 9:00 PM IST */} {timing.startTime} -{' '}
-                      {timing.endTime}
+                      {/* 8:00 PM – 9:00 PM IST */}{' '}
+                      {timeFormatter(timing.startTime)} -{' '}
+                      {timeFormatter(timing.endTime)}
                     </p>
                   </div>
                 </section>

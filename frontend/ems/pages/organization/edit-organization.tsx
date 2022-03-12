@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { ChangeEvent, FormEvent, useRef, useState } from 'react';
-import { FaRegPlusSquare } from 'react-icons/fa';
+import { FaRegPlusSquare, FaTrashAlt } from 'react-icons/fa';
 import { imageValidator } from 'utils/imageValidator';
 
 type TFormValues = {
@@ -220,7 +220,7 @@ const EditOrganizationPage = () => {
             </button>
             <button
               type='submit'
-              className={`w-[50%] py-1 text-green-700 border-2 border-green-700 rounded-md transition duration-200 ease-linear ${
+              className={`w-[50%] py-1 mr-2 text-green-700 border-2 border-green-700 rounded-md transition duration-200 ease-linear ${
                 isFieldDisabled
                   ? 'cursor-not-allowed'
                   : 'hover:text-white hover:bg-green-700'
@@ -228,6 +228,13 @@ const EditOrganizationPage = () => {
               disabled={isFieldDisabled}
             >
               Save
+            </button>
+            <button
+              type='button'
+              className={`w-[50%] py-1 text-red-600 border-2 border-red-600 rounded-md flex justify-center items-center hover:text-white hover:bg-red-600 transition duration-200 ease-linear`}
+            >
+              <FaTrashAlt className='mr-1' />
+              Delete
             </button>
           </div>
         </form>

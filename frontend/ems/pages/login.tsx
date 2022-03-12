@@ -6,7 +6,7 @@ import { setUserState } from 'app/features/user/userSlice';
 import { useAppDispatch } from 'app/hooks';
 import { TTokens } from 'types/token';
 import eventService from '@/services/eventService';
-import userService from '@/services/userService';
+import userService from '@/services/authService';
 import { UserValidation } from 'class/UserValidation';
 import { apolloClient } from 'app/graphql';
 import {
@@ -22,6 +22,8 @@ import { Env } from 'class/Env';
 import { loginUser } from 'app/features/auth/authSlice';
 import Link from 'next/link';
 import tokenClass from 'class/Token';
+import { store } from 'app/stores/store';
+import { observer } from 'mobx-react-lite';
 
 type TFormValues = {
   email: string;
@@ -102,32 +104,15 @@ const Login: NextPage = () => {
 
       console.log('success');
       setErrMsg(null);
-      await userService.loginUser(formValues);
-      /* await dispatch(loginUser(formValues)); */
+      //await userService.loginUser(formValues);
+      //dispatch(loginUser(formValues));
 
-      /* 
-      const token: TTokens = await userService.loginUser(formValues);
-      //localStorage.setItem('auth', token.refreshToken);
-      tokenClass.setAccessToken(token.accessToken);
- */
-      apolloClient.resetStore();
+      //apolloClient.resetStore();
+      await store.auth.loginUser(formValues);
 
-      /* const authMiddleware = new ApolloLink((operation : Operation, forward: NextLink) => {
-        const headers: { authorization: string } = {
-          authorization: `${token.tokenType} ${token.accessToken}`
-        };
-        console.log('authLink operation');
-        operation.setContext((req: any, prevCtx: any) => ({ ...prevCtx, headers }));
-        return forward(operation).map(data => {
-          console.log('after operation execution');
-          return data;
-        });
-      });
-
-      const aditiveLink = from([ authMiddleware, new HttpLink({ uri: Env.apiUrl }) ]);
-      apolloClient.setLink(aditiveLink); */
-
-      router.push('/');
+      if (store.auth.user && !store.auth.error) {
+        router.push('/');
+      }
     } catch (err: any) {
       setErrMsg(err.message);
     }
@@ -147,6 +132,9 @@ const Login: NextPage = () => {
       <form onSubmit={handleLogin} className='form'>
         <h2 className='form-heading'>Login</h2>
         {errMsg && <span className='input-error'>{errMsg}</span>}
+        {store.auth.error && (
+          <span className='input-error'>{store.auth.error}</span>
+        )}
 
         {formErrors.email && (
           <span className='input-error'>{formErrors.email}</span>
@@ -194,4 +182,4 @@ const Login: NextPage = () => {
   );
 };
 
-export default Login;
+export default observer(Login);

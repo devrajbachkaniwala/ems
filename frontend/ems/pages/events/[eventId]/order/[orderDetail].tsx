@@ -1,10 +1,15 @@
-import { GetServerSideProps, GetServerSidePropsResult } from 'next';
+import {
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  GetServerSidePropsResult,
+  NextPage
+} from 'next';
 import { useRouter } from 'next/router';
 import { stringify } from 'querystring';
 import { FC, ReactNode } from 'react';
 import { MdCheckCircle, MdCancel } from 'react-icons/md';
 
-const Order: FC = () => {
+const Order: NextPage = () => {
   const router = useRouter();
 
   const { orderDetail } = router.query;
@@ -54,3 +59,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     props: {}
   };
 };
+
+/* export async function getServerSideProps(
+  ctx: GetServerSidePropsContext
+): Promise<GetServerSidePropsResult<{ value: string }>> {
+  return {
+    props: {
+      value : ''
+    }
+  };
+} */

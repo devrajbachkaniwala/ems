@@ -1,7 +1,9 @@
+import eventService from '@/services/eventService';
+import { EventDetail as TEventDetail } from '@/services/eventService/__generated__/EventDetail';
 import EventDetail from 'components/eventsPage/eventDetail';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
-import { NextPage } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MdClose } from 'react-icons/md';
@@ -104,12 +106,16 @@ const eventData: TEventData = {
   ]
 };
 
-const EventDetailPage: NextPage = () => {
+type TEventDetailPageProps = {
+  event: TEventDetail['eventById'];
+};
+
+const EventDetailPage: NextPage<TEventDetailPageProps> = ({ event }) => {
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
   const [showOrganizationPopUp, setShowOrganizationPopUp] =
     useState<boolean>(false);
 
-  return <EventDetail event={eventData} />;
+  return event && <EventDetail event={event} />;
 
   return (
     <>
@@ -355,3 +361,26 @@ const EventDetailPage: NextPage = () => {
 };
 
 export default EventDetailPage;
+
+export const getServerSideProps: GetServerSideProps<{
+  event: TEventDetail['eventById'];
+}> = async (ctx) => {
+  const eventId = ctx.params?.eventId as string;
+
+  try {
+    const event = await eventService.getEventById(eventId);
+
+    return {
+      props: {
+        event
+      }
+    };
+  } catch (err: any) {
+    console.log(err);
+    return {
+      props: {
+        event: null
+      }
+    };
+  }
+};

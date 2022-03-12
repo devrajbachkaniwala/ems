@@ -7,6 +7,11 @@
 // GraphQL query operation: UserProfile
 // ====================================================
 
+export interface UserProfile_user_organization {
+  __typename: "Organization";
+  id: string;
+}
+
 export interface UserProfile_user {
   __typename: "User";
   id: string;
@@ -18,6 +23,7 @@ export interface UserProfile_user {
   createdAt: any;
   modifiedAt: any;
   userPhoto: string | null;
+  organization: UserProfile_user_organization | null;
 }
 
 export interface UserProfile {

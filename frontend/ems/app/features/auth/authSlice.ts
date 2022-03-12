@@ -6,22 +6,23 @@ import {
 } from '@reduxjs/toolkit';
 import { TTokens } from 'types/token';
 import type { TLoginUser, TUser } from 'types/user';
-import userService from '@/services/userService';
-import { IUserProfile } from '@/services/userService/types';
+import userService from '@/services/authService';
+import { IUserProfile } from '@/services/authService/types';
+import { UserProfile_user } from '@/services/authService/__generated__/UserProfile';
 
 type TInitialState = {
   loading: boolean | null;
-  data: IUserProfile['user'] | null;
+  user: UserProfile_user | null;
   error: string | null;
 };
 
 const initialState: TInitialState = {
   loading: null,
-  data: null,
+  user: null,
   error: null
 };
 
-export const loginUser: AsyncThunk<IUserProfile['user'], TLoginUser, {}> =
+export const loginUser: AsyncThunk<UserProfile_user, TLoginUser, {}> =
   createAsyncThunk('auth/login', async (user, thunkApi) => {
     try {
       const tokens: TTokens = await userService.loginUser(user);
@@ -46,12 +47,12 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.data = payload;
+        state.user = payload;
         state.error = null;
       })
       .addCase(loginUser.rejected, (state, { payload }) => {
         state.loading = false;
-        state.data = null;
+        state.user = null;
         state.error = payload as string;
       });
   }

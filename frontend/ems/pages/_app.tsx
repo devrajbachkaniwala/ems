@@ -1,5 +1,5 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import '../styles/globals.css';
+import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { Provider } from 'react-redux';
 import { store } from '../app/store';
@@ -10,20 +10,19 @@ import Layout from 'components/layout';
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-     <Head>
+      <Head>
         <title>Event Management System</title>
       </Head>
 
-      <Layout>
-        <Provider store={store}>
+      <Provider store={store}>
+        <Layout>
           <ApolloProvider client={apolloClient}>
             <Component {...pageProps} />
           </ApolloProvider>
-        </Provider>
-      </Layout>
-     
+        </Layout>
+      </Provider>
     </>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;

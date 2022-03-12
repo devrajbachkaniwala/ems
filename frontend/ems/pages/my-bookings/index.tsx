@@ -1,6 +1,12 @@
+import authService from '@/services/authService';
+import bookingService from '@/services/bookingService';
+import { GetUserBookings } from '@/services/bookingService/__generated__/GetUserBookings';
 import BookingEventLists from 'components/my-bookingsPage/bookingEventLists';
+import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
-export type TMyBookings = {
+export type TMyBooking = {
   id: number;
   event: {
     id: number;
@@ -41,7 +47,7 @@ export type TMyBookings = {
   };
 };
 
-export const myBookingsData: TMyBookings[] = [
+export const myBookingsData: TMyBooking[] = [
   {
     id: 1,
     event: {
@@ -174,28 +180,102 @@ export const myBookingsData: TMyBookings[] = [
 ];
 
 const MyBookings = () => {
-  const activeBookings = myBookingsData.filter((booking) => {
-    return booking.bookingItem.status === 'active';
-  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [myBookings, setmyBookings] = useState<
+    GetUserBookings['myBookings'] | undefined
+  >();
+  const [activeBookings, setActiveBookings] = useState<
+    GetUserBookings['myBookings'] | undefined
+  >();
+  const [canceledBookings, setCanceledBookings] = useState<
+    GetUserBookings['myBookings'] | undefined
+  >();
+  const router = useRouter();
 
-  const canceledBookings = myBookingsData.filter((booking) => {
-    return booking.bookingItem.status === 'cancel';
-  });
+  useEffect(() => {
+    authService
+      .getUserProfile()
+      .then((user) => {
+        bookingService
+          .getUserBookings()
+          .then((bookings) => {
+            setmyBookings(bookings);
+            setIsLoading(false);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+        router.replace('/login');
+      });
+  }, [router]);
+
+  useEffect(() => {
+    if (myBookings?.length) {
+      setActiveBookings(
+        myBookings.filter((booking) => {
+          return booking.bookingItem.status === 'active';
+        })
+      );
+
+      setCanceledBookings(
+        myBookings.filter((booking) => {
+          return booking.bookingItem.status === 'cancel';
+        })
+      );
+    }
+  }, [myBookings]);
+
+  /*  const activeBookings = (bookings: GetUserBookings['myBookings']) =>
+    bookings!.filter((booking) => {
+      return booking.bookingItem.status === 'active';
+    });
+
+  const canceledBookings = (bookings: GetUserBookings['myBookings']) =>
+    bookings!.filter((booking) => {
+      return booking.bookingItem.status === 'cancel';
+    }); */
+
+  if (!myBookings && isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const cancelBooking = async (bookingId: string) => {
+    const res = await bookingService.cancelBooking(bookingId);
+
+    if (res) {
+      console.log('success');
+      const bookings = await bookingService.getUserBookings();
+      setmyBookings(bookings);
+    }
+  };
 
   return (
     <div>
-      <article className=' text-slate-700'>
-        <h2 className='text-center text-xl font-bold'>My Bookings</h2>
-        <section>
-          <BookingEventLists myBookings={activeBookings}>
-            <h2 className='mt-4 font-semibold'>Active Bookings</h2>
-          </BookingEventLists>
+      <h2 className='text-center text-xl font-bold text-slate-700'>
+        My Bookings
+      </h2>
+      {myBookings?.length ? (
+        <article className=' text-slate-700'>
+          <section>
+            <BookingEventLists
+              myBookings={activeBookings ?? []}
+              isActive
+              cancelBooking={cancelBooking}
+            />
 
-          <BookingEventLists myBookings={canceledBookings}>
-            <h2 className='mt-4 font-semibold'>Canceled Bookings</h2>
-          </BookingEventLists>
-        </section>
-      </article>
+            <BookingEventLists
+              myBookings={canceledBookings ?? []}
+              isCanceled
+              cancelBooking={cancelBooking}
+            />
+          </section>
+        </article>
+      ) : (
+        <div>No Bookings</div>
+      )}
     </div>
   );
 };
