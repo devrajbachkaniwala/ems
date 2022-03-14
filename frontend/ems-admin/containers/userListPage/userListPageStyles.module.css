@@ -1,0 +1,40 @@
+.users {
+  @apply w-fit lg:w-[1024px] overflow-auto mb-4 rounded-bl-lg rounded-br-lg shadow-lg;
+}
+
+.users tr {
+  @apply overflow-hidden transition-all duration-200 ease-out;
+}
+
+.users td,
+.users th {
+  @apply p-2;
+}
+
+.users th {
+  @apply py-3 text-left bg-midnight-blue text-white;
+}
+
+.users tr:nth-child(odd) {
+  @apply bg-gray-200;
+}
+
+.users tr:hover {
+  @apply bg-gray-300;
+}
+
+.users thead th:first-child {
+  @apply rounded-tl-lg;
+}
+
+.users thead th:last-child {
+  @apply rounded-tr-lg;
+}
+
+.users tbody tr:last-child td:first-child {
+  @apply rounded-bl-lg;
+}
+
+.users tbody tr:last-child td:last-child {
+  @apply rounded-br-lg;
+}

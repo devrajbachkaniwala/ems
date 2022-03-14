@@ -4,21 +4,21 @@ import { store } from 'app/stores';
 import { Footer } from 'components/footer';
 import { Header } from 'components/header';
 import { ProtectedRoute } from 'components/protectedRoute';
-import { UserListPage } from 'containers/userListPage';
-import { observer } from 'mobx-react-lite';
-import type { NextPage } from 'next';
+import { UserDetailPage } from 'containers/userDetailPage';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
 
-const Home: NextPage & { getLayout: (page: any) => ReactNode } = () => {
-  /*  const [isLoading, setIsLoading] = useState<boolean>(true);
-  //const [adminUser, setAdminUser] = useState<UserProfile['user'] | undefined>();
-  //const { user, setUser } = store.auth;
+const UserDetail: NextPage & { getLayout: (page: any) => ReactNode } = () => {
+  /*   const [isLoading, setIsLoading] = useState<boolean>(true);
+  //const [adminUser, setAdminUser] = useState<UserProfile['user'] | undefined>(); */
 
   const router = useRouter();
+  const userId = router.query.userId as string;
 
-  useEffect(() => {
+  /*  useEffect(() => {
     if (store.auth.user?.id) {
+      console.log('there');
       return;
     }
     authService
@@ -28,7 +28,7 @@ const Home: NextPage & { getLayout: (page: any) => ReactNode } = () => {
           router.replace('/login');
         }
         store.auth.setUser(adminDetail);
-        //setUser(adminDetail);
+        //setAdminUser(adminDetail);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -40,23 +40,21 @@ const Home: NextPage & { getLayout: (page: any) => ReactNode } = () => {
   if (!store.auth.user && isLoading) {
     return <div>Loading...</div>;
   } */
-
   return (
     <>
-      <UserListPage />
+      <UserDetailPage userId={userId} />
     </>
   );
 };
 
-Home.getLayout = (page: any) => {
+export default UserDetail;
+
+UserDetail.getLayout = (page: any) => {
   return (
-    <>
-      <ProtectedRoute>
-        <Header />
-        {page}
-        <Footer />
-      </ProtectedRoute>
-    </>
+    <ProtectedRoute>
+      <Header />
+      {page}
+      <Footer />
+    </ProtectedRoute>
   );
 };
-export default observer(Home);

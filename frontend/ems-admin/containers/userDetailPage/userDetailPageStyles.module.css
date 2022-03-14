@@ -1,0 +1,15 @@
+.user {
+  @apply w-[400px] mx-auto flex sm:justify-center my-4;
+}
+
+.user tbody tr {
+  @apply w-full;
+}
+
+.user tr td:first-child {
+  @apply p-2 font-medium w-[50%];
+}
+
+.user tr td:last-child {
+  @apply p-2 font-medium w-[50%];
+}
