@@ -9,6 +9,12 @@ import {
 import authService from '@/services/authService';
 import orgService from '@/services/orgService';
 import { useRouter } from 'next/router';
+import Header from 'components/header';
+import Footer from 'components/footer';
+import { NextPage } from 'next';
+import { TPageLayout } from 'types/pageLayout';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { store } from 'app/stores';
 
 /* type TTeamMember = {
   id: number;
@@ -64,7 +70,7 @@ import { useRouter } from 'next/router';
   }
 ]; */
 
-const TeamMembers = () => {
+const TeamMembers: NextPage & TPageLayout = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [teamMembers, setTeamMembers] = useState<
     OrganizationTeamMembers['organization']['teamMembers'] | undefined
@@ -76,7 +82,7 @@ const TeamMembers = () => {
   const router = useRouter();
 
   useEffect(() => {
-    authService
+    /* authService
       .getUserProfile()
       .then((user) => {
         if (!user.organization?.id) {
@@ -101,8 +107,18 @@ const TeamMembers = () => {
       .catch((err) => {
         console.log(err);
         router.replace('/login');
+      }); */
+    orgService
+      .getOrgTeamMembers()
+      .then((org) => {
+        setUserId(store.auth.user?.id);
+        setTeamMembers(org.teamMembers);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
       });
-  }, [router]);
+  }, []);
 
   const addTeamMember = async (e: FormEvent<HTMLFormElement>) => {
     try {
@@ -244,3 +260,15 @@ const TeamMembers = () => {
 };
 
 export default TeamMembers;
+
+TeamMembers.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

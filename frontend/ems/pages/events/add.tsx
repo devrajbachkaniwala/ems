@@ -7,8 +7,12 @@ import { imageValidator } from 'utils/imageValidator';
 import { FaTrashAlt } from 'react-icons/fa';
 import AddEditEvent from 'components/addEditEvent';
 import { EventList_events } from '@/services/eventService/__generated__/EventList';
+import Header from 'components/header';
+import Footer from 'components/footer';
+import { TPageLayout } from 'types/pageLayout';
+import { ProtectedRoute } from 'components/protectedRoute';
 
-const AddEvent: NextPage = () => {
+const AddEvent: NextPage & TPageLayout = () => {
   return (
     <>
       <AddEditEvent />
@@ -17,3 +21,15 @@ const AddEvent: NextPage = () => {
 };
 
 export default AddEvent;
+
+AddEvent.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

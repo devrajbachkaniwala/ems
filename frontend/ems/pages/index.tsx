@@ -22,15 +22,17 @@ import eventStyles from 'styles/event.module.css';
 import Link from 'next/link';
 import { EventList } from '@/services/eventService/__generated__/EventList';
 import { dateFormatter } from 'utils/dateFormatter';
-import { store } from 'app/stores/store';
+import { store } from 'app/stores';
 import { observer } from 'mobx-react-lite';
 import { isFreeEvent } from 'utils/isFreeEvent';
+import { TPageLayout } from 'types/pageLayout';
+import { ProtectedRoute } from 'components/protectedRoute';
 
 type THomeProps = {
   events: EventList['events'];
 };
 
-const Home: NextPage<THomeProps> = ({ events }) => {
+const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
   /* const handleLogout = async () => {
     const res = await axios.post(`${Env.authUrl}/logout`, null, {
       withCredentials: true
@@ -140,7 +142,19 @@ const Home: NextPage<THomeProps> = ({ events }) => {
   );
 };
 
-export default observer(Home);
+export default Home;
+
+Home.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='public'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
 
 export const getServerSideProps: GetServerSideProps<{
   events: EventList['events'];

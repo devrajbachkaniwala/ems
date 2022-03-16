@@ -1,15 +1,21 @@
 import authService from '@/services/authService';
+import { store } from 'app/stores';
+import Footer from 'components/footer';
+import Header from 'components/header';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { NextPage } from 'next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { FaRegPlusSquare } from 'react-icons/fa';
+import { TPageLayout } from 'types/pageLayout';
 import { imageValidator } from 'utils/imageValidator';
 import { UpdateUserInput } from '__generated__/globalTypes';
 import { UserProfile } from '../app/services/authService/__generated__/UserProfile';
 
-const EditProfile: FC = () => {
+const EditProfile: NextPage & TPageLayout = () => {
   const [user, setUser] = useState<UserProfile['user'] | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  //const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFieldDisabled, setIsFieldDisabled] = useState<boolean>(true);
   const [profilePic, setProfilePic] = useState<string | null>(null);
 
@@ -17,7 +23,7 @@ const EditProfile: FC = () => {
   const imgRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    authService
+    /* authService
       .getUserProfile()
       .then((userDetail) => {
         setIsLoading(false);
@@ -26,8 +32,9 @@ const EditProfile: FC = () => {
       .catch((err) => {
         console.log(err);
         router.replace('/login');
-      });
-  }, [router]);
+      }); */
+    setUser(store.auth.user);
+  }, []);
 
   useEffect(() => {
     if (user?.userPhoto) {
@@ -102,6 +109,14 @@ const EditProfile: FC = () => {
       const res = await authService.updateUserProfile(updatedUser);
 
       if (res.id) {
+        if (store.auth.user) {
+          store.auth.setUser({
+            ...store.auth.user,
+            fullName: res.fullName,
+            username: res.username,
+            userPhoto: res.userPhoto
+          });
+        }
         console.log('successfully updated');
       }
     } catch (err: any) {
@@ -109,7 +124,7 @@ const EditProfile: FC = () => {
     }
   };
 
-  if (!user && isLoading) {
+  if (!user) {
     return <div>Loading...</div>;
   }
 
@@ -240,3 +255,15 @@ const EditProfile: FC = () => {
 };
 
 export default EditProfile;
+
+EditProfile.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='user'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

@@ -13,7 +13,6 @@ class TokenService {
           authorization: `Bearer ${refreshToken}`
         }
       });
-      sessionStorage.setItem('accessToken', res.data.accessToken);
 
       return res.data;
     } catch (err: any) {

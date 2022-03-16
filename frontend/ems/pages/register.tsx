@@ -14,6 +14,12 @@ import { UserValidation } from '../class/UserValidation';
 import { TRegisterUser, TUser } from '../types/user';
 import { FaPlusCircle, FaRegPlusSquare } from 'react-icons/fa';
 import Link from 'next/link';
+import { store } from 'app/stores';
+import authService from '@/services/authService';
+import LoadingSpinner from 'components/loadingSpinner';
+import Header from 'components/header';
+import Footer from 'components/footer';
+import { TPageLayout } from 'types/pageLayout';
 
 type TFormValues = TRegisterUser & { confirmPassword: string };
 
@@ -45,14 +51,31 @@ const imageValidator = (imgFile: File): boolean => {
   return true;
 };
 
-const Register: NextPage = () => {
+const Register: NextPage & TPageLayout = () => {
   const [formValues, setFormValues] = useState<TFormValues>(initialFormValues);
   const [formErrors, setFormErrors] = useState<TFormErrors>({});
   const [isSubmit, setIsSubmit] = useState<boolean>(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const imgRef = useRef<HTMLInputElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (store.auth.user?.id) {
+      router.replace('/');
+      return;
+    }
+    authService
+      .getUserProfile()
+      .then((userDetail) => {
+        router.replace('/');
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      });
+  }, [router]);
 
   const setUserPhoto = (imgFile: File) => {
     const reader = new FileReader();
@@ -208,11 +231,13 @@ const Register: NextPage = () => {
     }
   };
 
-  /*   return (
-        <div>
-            <RegisterForm></RegisterForm>            
-        </div>
-    ); */
+  if (isLoading) {
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
@@ -348,3 +373,13 @@ const Register: NextPage = () => {
 };
 
 export default Register;
+
+Register.getLayout = (page: any) => {
+  return (
+    <>
+      <Header />
+      {page}
+      <Footer />
+    </>
+  );
+};

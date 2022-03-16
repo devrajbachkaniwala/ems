@@ -1,10 +1,15 @@
 import authService from '@/services/authService';
 import eventService from '@/services/eventService';
 import { MyEvents } from '@/services/eventService/__generated__/MyEvents';
+import { store } from 'app/stores';
+import Footer from 'components/footer';
+import Header from 'components/header';
 import MyEventList from 'components/myEventsPage/myEventLists';
+import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { TPageLayout } from 'types/pageLayout';
 
 export type TMyEvent = {
   id: number;
@@ -128,7 +133,7 @@ export const myEventsData: TMyEvent = {
   ]
 };
 
-const MyEventsPage: NextPage = () => {
+const MyEventsPage: NextPage & TPageLayout = () => {
   const [myEvents, setMyEvents] = useState<
     MyEvents['organization']['events'] | undefined
   >();
@@ -136,7 +141,7 @@ const MyEventsPage: NextPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    authService.getUserProfile().then((user) => {
+    /* authService.getUserProfile().then((user) => {
       if (user.organization?.id) {
         eventService
           .orgEvents()
@@ -151,8 +156,18 @@ const MyEventsPage: NextPage = () => {
       } else {
         router.replace('/organization/add');
       }
-    });
-  }, [router]);
+    }); */
+    eventService
+      .orgEvents()
+      .then((events) => {
+        console.log(events);
+        setMyEvents(events);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   if (!myEvents && isLoading) {
     return <div>Loading...</div>;
@@ -193,3 +208,15 @@ const MyEventsPage: NextPage = () => {
 };
 
 export default MyEventsPage;
+
+MyEventsPage.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

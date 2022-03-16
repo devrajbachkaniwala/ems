@@ -1,14 +1,18 @@
 import eventService from '@/services/eventService';
 import { EventList } from '@/services/eventService/__generated__/EventList';
 import EventLists from 'components/eventsPage/eventLists';
+import Footer from 'components/footer';
+import Header from 'components/header';
+import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
 import { FaSearch } from 'react-icons/fa';
+import { TPageLayout } from 'types/pageLayout';
 
 type TEventsProps = {
   events: EventList['events'];
 };
 
-const Events: NextPage<TEventsProps> = ({ events }) => {
+const Events: NextPage<TEventsProps> & TPageLayout = ({ events }) => {
   return (
     <div className='min-h-[80vh] overflow-auto'>
       {/* Event Search Bar */}
@@ -27,6 +31,18 @@ const Events: NextPage<TEventsProps> = ({ events }) => {
 };
 
 export default Events;
+
+Events.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='public'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
 
 export const getServerSideProps: GetServerSideProps<{
   events: EventList['events'];

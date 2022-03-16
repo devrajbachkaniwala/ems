@@ -126,18 +126,21 @@ const Login: NextPage & { getLayout: (page: any) => ReactNode } = () => {
       } */
       const res = await authService.loginUser(formValues);
       sessionStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
       const user = await authService.getUserProfile();
       console.log(user);
       if (user.role === 'admin') {
         if (res.accessToken) {
           console.log(res);
+          store.auth.setUser(user);
+          localStorage.setItem('refreshToken', res.refreshToken);
           setIsLoading(true);
           router.replace('/');
-          store.auth.setUser(user);
           return;
         }
         return;
+      } else {
+        sessionStorage.clear();
+        await authService.logout(res.refreshToken);
       }
       setErrMsg('Not an Admin');
     } catch (err: any) {

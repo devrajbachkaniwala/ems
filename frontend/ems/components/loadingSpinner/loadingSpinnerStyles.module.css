@@ -1,0 +1,26 @@
+.spinner {
+  @apply w-[120px] h-[120px] rounded-full relative mt-1;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner .outer-layer-one {
+  @apply absolute top-0 right-0 bottom-0 left-0 border-t-4 border-purple-400;
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
+  animation: spin 2s linear infinite;
+}
+
+.spinner .inner-layer-one {
+  @apply absolute top-0 right-0 bottom-0 left-0 border-b-4 border-purple-800;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.spinner .loading-text {
+  @apply text-purple-800 absolute top-[48px] left-[26.38px] animate-bounce;
+}

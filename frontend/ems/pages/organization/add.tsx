@@ -1,16 +1,28 @@
 import authService from '@/services/authService';
 import orgService from '@/services/orgService';
+import { store } from 'app/stores';
 import AddEditOrg from 'components/addEditOrg';
-import { GetServerSideProps } from 'next';
+import Footer from 'components/footer';
+import Header from 'components/header';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { TPageLayout } from 'types/pageLayout';
 
-const AddOrganization = () => {
+const AddOrganization: NextPage & TPageLayout = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
-    authService
+    if (store.auth.user?.organization?.id) {
+      router.replace(`/organization/${store.auth.user?.organization?.id}/edit`);
+      return;
+    } else {
+      setIsLoading(false);
+    }
+
+    /*     authService
       .getUserProfile()
       .then((res) => {
         if (res.organization?.id) {
@@ -21,7 +33,7 @@ const AddOrganization = () => {
       })
       .catch((err: any) => {
         console.log(JSON.stringify(err));
-      });
+      }); */
   }, [router]);
 
   if (isLoading) {
@@ -36,6 +48,19 @@ const AddOrganization = () => {
 };
 
 export default AddOrganization;
+
+AddOrganization.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
+
 /* 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   try {

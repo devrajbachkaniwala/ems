@@ -1,10 +1,14 @@
 import authService from '@/services/authService';
 import bookingService from '@/services/bookingService';
 import { BookingDetail } from '@/services/bookingService/__generated__/BookingDetail';
+import Footer from 'components/footer';
+import Header from 'components/header';
 import BookedEventDetail from 'components/my-bookingsPage/bookedEventDetail';
-import { GetServerSideProps, GetServerSidePropsResult } from 'next';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { GetServerSideProps, GetServerSidePropsResult, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { TPageLayout } from 'types/pageLayout';
 import { myBookingsData, TMyBooking } from '.';
 
 /* type TEvent = {
@@ -62,7 +66,7 @@ type TBookedEventDetail = {
   };
 };
 
-const BookingDetail = () => {
+const BookingDetail: NextPage & TPageLayout = () => {
   const router = useRouter();
   const bookingId = router.query.bookingId as string;
 
@@ -73,25 +77,18 @@ const BookingDetail = () => {
 
   useEffect(() => {
     if (bookingId) {
-      authService
-        .getUserProfile()
-        .then((user) => {
-          bookingService
-            .getBookingById(bookingId)
-            .then((booking) => {
-              if (!booking?.id) {
-                router.replace('/my-bookings');
-              }
-              setBookingDetail(booking);
-            })
-            .catch((err) => {
-              console.log(err);
-              router.replace('/my-bookings');
-            });
+      bookingService
+        .getBookingById(bookingId)
+        .then((booking) => {
+          if (!booking?.id) {
+            router.replace('/my-bookings');
+          }
+          setBookingDetail(booking);
+          setIsLoading(false);
         })
         .catch((err) => {
           console.log(err);
-          router.replace('/login');
+          router.replace('/my-bookings');
         });
     }
   }, [bookingId, router]);
@@ -139,3 +136,15 @@ const BookingDetail = () => {
 };
 
 export default BookingDetail;
+
+BookingDetail.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='user'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

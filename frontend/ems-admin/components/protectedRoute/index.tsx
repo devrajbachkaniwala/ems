@@ -16,6 +16,7 @@ const ProtectedRoute: FC<TProtectedRoute> = ({ children }) => {
 
   useEffect(() => {
     if (store.auth.user?.id) {
+      setIsLoading(false);
       return;
     }
     authService
@@ -23,6 +24,7 @@ const ProtectedRoute: FC<TProtectedRoute> = ({ children }) => {
       .then((adminDetail) => {
         if (!adminDetail.id) {
           router.replace('/login');
+          return;
         }
         store.auth.setUser(adminDetail);
         //setUser(adminDetail);

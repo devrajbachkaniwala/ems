@@ -1,12 +1,16 @@
 import eventService from '@/services/eventService';
 import { EventDetail as TEventDetail } from '@/services/eventService/__generated__/EventDetail';
 import EventDetail from 'components/eventsPage/eventDetail';
+import Footer from 'components/footer';
+import Header from 'components/header';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
+import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MdClose } from 'react-icons/md';
+import { TPageLayout } from 'types/pageLayout';
 
 export type TEventData = {
   id: number;
@@ -110,7 +114,9 @@ type TEventDetailPageProps = {
   event: TEventDetail['eventById'];
 };
 
-const EventDetailPage: NextPage<TEventDetailPageProps> = ({ event }) => {
+const EventDetailPage: NextPage<TEventDetailPageProps> & TPageLayout = ({
+  event
+}) => {
   const [showRegisterModal, setShowRegisterModal] = useState<boolean>(false);
   const [showOrganizationPopUp, setShowOrganizationPopUp] =
     useState<boolean>(false);
@@ -361,6 +367,18 @@ const EventDetailPage: NextPage<TEventDetailPageProps> = ({ event }) => {
 };
 
 export default EventDetailPage;
+
+EventDetailPage.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='public'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
 
 export const getServerSideProps: GetServerSideProps<{
   event: TEventDetail['eventById'];

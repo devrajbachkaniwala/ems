@@ -8,22 +8,25 @@ import { TTokens } from 'types/token';
 import { TLoginUser } from 'types/user';
 import tokenClass from 'class/Token';
 
-export class AuthStore {
-  loading: boolean = false;
-  user: UserProfile_user | null = null;
-  error: string | null = null;
+class AuthStore {
+  //loading: boolean = false;
+  //user: UserProfile_user | null = null;
+  //error: string | null = null;
+
+  user: UserProfile_user | undefined = undefined;
 
   constructor() {
     makeObservable(this, {
-      loading: observable,
       user: observable,
-      error: observable,
-      loginUser: action,
       setUser: action
     });
   }
 
-  async loginUser(user: TLoginUser) {
+  setUser(user: UserProfile_user | undefined) {
+    this.user = user;
+  }
+
+  /* async loginUser(user: TLoginUser) {
     this.loading = true;
     this.user = null;
     try {
@@ -45,7 +48,7 @@ export class AuthStore {
         this.error = err.message;
       });
     }
-  }
+  } */
 
   /*  async logout() {
     this.loading = true;
@@ -53,10 +56,6 @@ export class AuthStore {
       const res = await authService.
     } catch (err: any) {}
   } */
-
-  setUser(user: UserProfile_user) {
-    this.loading = false;
-    this.user = user;
-    this.error = null;
-  }
 }
+
+export default new AuthStore();

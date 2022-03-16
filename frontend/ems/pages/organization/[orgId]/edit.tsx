@@ -1,17 +1,21 @@
 import orgService from '@/services/orgService';
 import { GetOrganization } from '@/services/orgService/__generated__/GetOrganization';
-import { store } from 'app/stores/store';
+import { store } from 'app/stores';
 import AddEditOrganization, { TOrganization } from 'components/addEditOrg';
-import { GetServerSideProps } from 'next';
+import { GetServerSideProps, NextPage } from 'next';
 import { FC, useEffect, useLayoutEffect, useState } from 'react';
 import tokenClass from 'class/Token';
 import { useRouter } from 'next/router';
+import { TPageLayout } from 'types/pageLayout';
+import Header from 'components/header';
+import Footer from 'components/footer';
+import { ProtectedRoute } from 'components/protectedRoute';
 
 /* type TEditOrganizationProps = {
   organization: GetOrganization['organization'];
 }; */
 
-const EditOrganization: FC = () => {
+const EditOrganization: NextPage & TPageLayout = () => {
   const [org, setOrg] = useState<TOrganization | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
@@ -45,6 +49,18 @@ const EditOrganization: FC = () => {
 };
 
 export default EditOrganization;
+
+EditOrganization.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
 
 /* export const getServerSideProps: GetServerSideProps<
   TEditOrganizationProps

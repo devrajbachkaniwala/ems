@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from 'react';
 import { setUserState } from 'app/features/user/userSlice';
 import { useAppDispatch } from 'app/hooks';
 import { TTokens } from 'types/token';
@@ -22,8 +22,13 @@ import { Env } from 'class/Env';
 import { loginUser } from 'app/features/auth/authSlice';
 import Link from 'next/link';
 import tokenClass from 'class/Token';
-import { store } from 'app/stores/store';
+import { store } from 'app/stores';
 import { observer } from 'mobx-react-lite';
+import authService from '@/services/authService';
+import Header from 'components/header';
+import Footer from 'components/footer';
+import { TPageLayout } from 'types/pageLayout';
+import LoadingSpinner from 'components/loadingSpinner';
 
 type TFormValues = {
   email: string;
@@ -40,12 +45,29 @@ const initialFormValues: TFormValues = {
   password: ''
 };
 
-const Login: NextPage = () => {
+const Login: NextPage & TPageLayout = () => {
   const [formValues, setFormValues] = useState<TFormValues>(initialFormValues);
   const [formErrors, setFormErrors] = useState<TFormErrors>({});
   const [errMsg, setErrMsg] = useState<string | null>(null);
-  const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const router = useRouter();
+
+  useEffect(() => {
+    if (store.auth.user?.id) {
+      router.replace('/');
+      return;
+    }
+    authService
+      .getUserProfile()
+      .then((userDetail) => {
+        router.replace('/');
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      });
+  }, [router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormValues({
@@ -108,33 +130,35 @@ const Login: NextPage = () => {
       //dispatch(loginUser(formValues));
 
       //apolloClient.resetStore();
-      await store.auth.loginUser(formValues);
+      //await store.auth.loginUser(formValues);
 
-      if (store.auth.user && !store.auth.error) {
-        router.push('/');
+      const res = await authService.loginUser(formValues);
+      sessionStorage.setItem('accessToken', res.accessToken);
+      localStorage.setItem('refreshToken', res.refreshToken);
+      const user = await authService.getUserProfile();
+
+      if (user.id) {
+        store.auth.setUser(user);
+        router.replace('/');
       }
     } catch (err: any) {
       setErrMsg(err.message);
     }
   };
 
-  const handleTest = async () => {
-    try {
-      const res = await userService.getUserProfile();
-      console.log(res);
-    } catch (err: any) {
-      setErrMsg(err.message);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
       <form onSubmit={handleLogin} className='form'>
         <h2 className='form-heading'>Login</h2>
         {errMsg && <span className='input-error'>{errMsg}</span>}
-        {store.auth.error && (
-          <span className='input-error'>{store.auth.error}</span>
-        )}
 
         {formErrors.email && (
           <span className='input-error'>{formErrors.email}</span>
@@ -182,4 +206,14 @@ const Login: NextPage = () => {
   );
 };
 
-export default observer(Login);
+export default Login;
+
+Login.getLayout = (page: any) => {
+  return (
+    <>
+      <Header />
+      {page}
+      <Footer />
+    </>
+  );
+};

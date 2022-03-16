@@ -2,6 +2,7 @@
 import authService from '@/services/authService';
 import bookingService from '@/services/bookingService';
 import { EventDetail } from '@/services/eventService/__generated__/EventDetail';
+import { store } from 'app/stores';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
 import { MonthEnum } from 'enums/monthEnum';
@@ -38,10 +39,11 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
   const registerBooking: MouseEventHandler<HTMLButtonElement> = async (e) => {
     try {
       if (event && organization && prices?.length && timings?.length) {
-        const user = await authService.getUserProfile();
+        //const user = await authService.getUserProfile();
 
-        if (!user.id) {
+        if (!store.auth.user?.id) {
           router.push('/login');
+          return;
         }
 
         const res = await bookingService.bookEvent({
@@ -53,6 +55,7 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
         });
         if (res?.id) {
           console.log('success');
+          router.push('/my-bookings');
         }
       }
     } catch (err: any) {

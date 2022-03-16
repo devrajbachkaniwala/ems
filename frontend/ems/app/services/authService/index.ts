@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { TRegisterUser, TUser, TLoginUser } from 'types/user';
-import { TTokens } from 'types/token';
+import { TAccessToken, TTokens } from 'types/token';
 import { Env } from 'class/Env';
 import { apolloClient } from 'app/graphql';
 import { GET_USER_PROFILE } from './queries';
@@ -85,6 +85,28 @@ class authService {
 
       return res.data.updateUser;
     } catch (err: any) {
+      throw err;
+    }
+  }
+
+  async getNewAccessToken(refreshToken: string): Promise<TAccessToken> {
+    try {
+      const res: AxiosResponse<TAccessToken> = await axios.post<
+        TAccessToken,
+        AxiosResponse<TAccessToken>
+      >(`${Env.authUrl}/token`, null, {
+        headers: {
+          authorization: `Bearer ${refreshToken}`
+        }
+      });
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response.data.errorCode && err.response.data.message) {
+        throw new Error(
+          `${err.response.data.errorCode}: ${err.response.data.message}`
+        );
+      }
       throw err;
     }
   }

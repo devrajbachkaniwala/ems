@@ -1,11 +1,17 @@
 import authService from '@/services/authService';
 import eventService from '@/services/eventService';
 import { EventDetail } from '@/services/eventService/__generated__/EventDetail';
+import { store } from 'app/stores';
 import AddEditEvent from 'components/addEditEvent';
+import Footer from 'components/footer';
+import Header from 'components/header';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { FC, useEffect, useState } from 'react';
+import { TPageLayout } from 'types/pageLayout';
 
-const EditEvent: FC = () => {
+const EditEvent: NextPage & TPageLayout = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
   const eventId = router.query.eventId as string;
@@ -14,32 +20,21 @@ const EditEvent: FC = () => {
 
   useEffect(() => {
     if (eventId) {
-      authService
-        .getUserProfile()
-        .then((user) => {
-          if (user.organization?.id) {
-            eventService
-              .getEventById(eventId)
-              .then((event) => {
-                if (event.organization.id === user.organization?.id) {
-                  console.log(event);
-                  setEvent(event);
-                  setIsLoading(false);
-                } else {
-                  router.push('/events/add');
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-                console.log(JSON.stringify(err));
-                router.push('/events/add');
-              });
+      eventService
+        .getEventById(eventId)
+        .then((event) => {
+          if (event.organization.id === store.auth.user?.organization?.id) {
+            console.log(event);
+            setEvent(event);
+            setIsLoading(false);
           } else {
-            router.push('/organization/add');
+            router.push('/events/add');
           }
         })
         .catch((err) => {
           console.log(err);
+          console.log(JSON.stringify(err));
+          router.push('/events/add');
         });
     }
   }, [eventId, router]);
@@ -56,3 +51,15 @@ const EditEvent: FC = () => {
 };
 
 export default EditEvent;
+
+EditEvent.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='organization'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};

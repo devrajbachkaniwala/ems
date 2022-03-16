@@ -1,3 +1,4 @@
+import authService from '@/services/authService';
 import tokenService from '@/services/tokenService';
 import {
   ApolloClient,
@@ -12,7 +13,7 @@ import {
 import { setContext } from '@apollo/client/link/context';
 import { Env } from 'class/Env';
 import tokenClass from 'class/Token';
-import { JwtPayload, verify } from 'jsonwebtoken';
+import { decode, JwtPayload, verify } from 'jsonwebtoken';
 
 const http: HttpLink = new HttpLink({
   uri: Env.apiUrl
@@ -128,9 +129,43 @@ const ctx = setContext(async (_, prevCtx: any) => {
   }
 });
 
+const authTokenMiddleware = setContext(async (req, { headers }) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const accessToken = sessionStorage.getItem('accessToken') ?? '';
+
+  if (accessToken) {
+    const tokenMetaData: string | JwtPayload | null = decode(accessToken);
+    if (tokenMetaData && typeof tokenMetaData !== 'string') {
+      const currTime = Date.now() / 1000;
+      if (tokenMetaData.exp && tokenMetaData.exp > currTime) {
+        console.log('accessToken time valid');
+        return {
+          headers: {
+            authorization: `Bearer ${accessToken}`
+          }
+        };
+      }
+    }
+  }
+  const refreshToken = localStorage.getItem('refreshToken') ?? '';
+  if (refreshToken) {
+    const res = await authService.getNewAccessToken(refreshToken);
+    sessionStorage.setItem('accessToken', res.accessToken);
+    console.log('fetched new accessToken');
+    return {
+      headers: {
+        authorization: `Bearer ${res.accessToken}`
+      }
+    };
+  }
+});
+
 /* It creates a new ApolloClient instance. */
 export const apolloClient: ApolloClient<NormalizedCacheObject> =
   new ApolloClient({
     cache: new InMemoryCache(),
-    link: from([setAuth, http])
+    link: from([authTokenMiddleware, http])
   });

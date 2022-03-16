@@ -1,10 +1,14 @@
 import authService from '@/services/authService';
 import bookingService from '@/services/bookingService';
 import { GetUserBookings } from '@/services/bookingService/__generated__/GetUserBookings';
+import Footer from 'components/footer';
+import Header from 'components/header';
 import BookingEventLists from 'components/my-bookingsPage/bookingEventLists';
-import { GetServerSideProps } from 'next';
+import { ProtectedRoute } from 'components/protectedRoute';
+import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { TPageLayout } from 'types/pageLayout';
 
 export type TMyBooking = {
   id: number;
@@ -179,7 +183,7 @@ export const myBookingsData: TMyBooking[] = [
   }
 ];
 
-const MyBookings = () => {
+const MyBookings: NextPage & TPageLayout = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [myBookings, setmyBookings] = useState<
     GetUserBookings['myBookings'] | undefined
@@ -193,7 +197,7 @@ const MyBookings = () => {
   const router = useRouter();
 
   useEffect(() => {
-    authService
+    /* authService
       .getUserProfile()
       .then((user) => {
         bookingService
@@ -209,8 +213,17 @@ const MyBookings = () => {
       .catch((err) => {
         console.log(err);
         router.replace('/login');
+      }); */
+    bookingService
+      .getUserBookings()
+      .then((bookings) => {
+        setmyBookings(bookings);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
       });
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     if (myBookings?.length) {
@@ -253,7 +266,7 @@ const MyBookings = () => {
   };
 
   return (
-    <div>
+    <div className='min-h-[80vh] overflow-auto'>
       <h2 className='text-center text-xl font-bold text-slate-700'>
         My Bookings
       </h2>
@@ -281,3 +294,15 @@ const MyBookings = () => {
 };
 
 export default MyBookings;
+
+MyBookings.getLayout = (page: any) => {
+  return (
+    <>
+      <ProtectedRoute role='user'>
+        <Header />
+        {page}
+        <Footer />
+      </ProtectedRoute>
+    </>
+  );
+};
