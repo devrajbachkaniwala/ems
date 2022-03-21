@@ -8,6 +8,7 @@ export const Event_List = gql`
       city
       state
       country
+      category
       organization {
         id
         name

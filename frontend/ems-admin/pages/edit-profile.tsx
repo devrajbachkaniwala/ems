@@ -1,21 +1,12 @@
 import authService from '@/services/authService';
 import { store } from 'app/stores';
-import { UserValidation } from 'class/UserValidation';
-import Footer from 'components/footer';
-import Header from 'components/header';
+import { Footer } from 'components/footer';
+import { Header } from 'components/header';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { NextPage } from 'next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import {
-  ChangeEvent,
-  FC,
-  FormEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { ChangeEvent, FC, FormEvent, useEffect, useRef, useState } from 'react';
 import { FaRegPlusSquare } from 'react-icons/fa';
 import { TPageLayout } from 'types/pageLayout';
 import { imageValidator } from 'utils/imageValidator';
@@ -23,52 +14,51 @@ import { UpdateUserInput } from '__generated__/globalTypes';
 import { UserProfile } from '../app/services/authService/__generated__/UserProfile';
 
 const EditProfile: NextPage & TPageLayout = () => {
-  const [formValues, setFormValues] = useState<
-    UserProfile['user'] | undefined
-  >();
-
-  const [formErrors, setFormErrors] = useState<Partial<UserProfile['user']>>(
-    {}
-  );
+  const [user, setUser] = useState<UserProfile['user'] | undefined>();
   //const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFieldDisabled, setIsFieldDisabled] = useState<boolean>(true);
+  const [profilePic, setProfilePic] = useState<string | null>(null);
 
+  const router = useRouter();
   const imgRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    setFormValues(store.auth.user);
+    /* authService
+      .getUserProfile()
+      .then((userDetail) => {
+        setIsLoading(false);
+        setUser(userDetail);
+      })
+      .catch((err) => {
+        console.log(err);
+        router.replace('/login');
+      }); */
+    setUser(store.auth.user);
   }, []);
+
+  useEffect(() => {
+    if (user?.userPhoto) {
+      setProfilePic(user.userPhoto);
+    }
+  }, [user]);
 
   const setUserPhoto = (imgFile: File) => {
     const reader = new FileReader();
     reader.readAsDataURL(imgFile);
     reader.onload = () => {
-      setFormValues((prevState) => {
-        if (prevState) {
-          return {
-            ...prevState,
-            userPhoto: reader.result as string
-          };
-        }
-      });
+      setProfilePic(reader.result as string);
     };
   };
 
   const handleUserPhoto = (e: ChangeEvent<HTMLInputElement>): void => {
     try {
-      /* setFormValues((prevState) => {
-        if (prevState) {
-          return {
-            ...prevState,
-            userPhoto: ''
-          };
-        }
-      }); */
+      setProfilePic(null);
       if (!e.target.files?.length) {
-        setFormErrors((prevState) => ({
-          ...prevState,
-          userPhoto: ''
-        }));
+        /*  setIsSubmit(true);
+        setFormErrors({
+          ...formErrors,
+          userPhoto: null
+        }); */
         return;
       }
 
@@ -77,83 +67,46 @@ const EditProfile: NextPage & TPageLayout = () => {
       const isValidImg: boolean = imageValidator(file);
 
       if (isValidImg) {
-        setFormErrors((prevState) => ({
-          ...prevState,
-          userPhoto: ''
-        }));
+        /* setFormErrors({
+          ...formErrors,
+          userPhoto: null
+        }); */
+        //setIsSubmit(true);
         setUserPhoto(file);
       }
     } catch (err: any) {
-      setFormErrors((prevState) => ({
-        ...prevState,
+      /* setFormErrors({
+        ...formErrors,
         userPhoto: err.message
-      }));
+      }); */
+      // setIsSubmit(false);
     }
   };
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormValues((prevState) => {
+    setUser((prevState) => {
       if (prevState) {
         return {
           ...prevState,
-          [e.target.name]: e.target.value
+          [e.target.name]: e.target.value,
+          userPhoto: profilePic
         };
       }
     });
   };
 
-  const validate = async () => {
-    const isValidUsername: boolean = await UserValidation.username(
-      formValues?.username ?? ''
-    )
-      .then((res) => {
-        setFormErrors((prevState) => ({ ...prevState, username: '' }));
-        return res;
-      })
-      .catch((err) => {
-        setFormErrors((prevState) => ({ ...prevState, username: err.message }));
-        return false;
-      });
-
-    const isValidFullName: boolean = await UserValidation.fullName(
-      formValues?.fullName ?? ''
-    )
-      .then((res) => {
-        setFormErrors((prevState) => ({ ...prevState, fullName: '' }));
-        return res;
-      })
-      .catch((err) => {
-        setFormErrors((prevState) => ({ ...prevState, fullName: err.message }));
-        return false;
-      });
-
-    const isValidImg = formErrors.userPhoto ? false : true;
-
-    if (!(isValidUsername && isValidFullName && isValidImg)) {
-      return false;
-    }
-    return true;
-  };
-
   const updateUser = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const isValid = await validate();
-
-    if (!isValid) {
-      console.log('validation error');
-      return;
-    }
+    setIsFieldDisabled(true);
 
     const updatedUser: UpdateUserInput = {
-      username: formValues?.username,
-      userPhoto: formValues?.userPhoto,
-      fullName: formValues?.fullName
+      fullName: user?.fullName,
+      username: user?.username,
+      userPhoto: profilePic
     };
 
     try {
       const res = await authService.updateUserProfile(updatedUser);
-      setIsFieldDisabled(true);
 
       if (res.id) {
         if (store.auth.user) {
@@ -171,41 +124,34 @@ const EditProfile: NextPage & TPageLayout = () => {
     }
   };
 
-  if (!formValues) {
+  if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
-      {formValues ? (
+      {user ? (
         <div className='w-full sm:w-4/5 sm:mx-auto min-h-[80vh] overflow-auto  text-slate-700 flex flex-col items-center'>
           <form
             className='w-full sm:w-[400px] px-2 flex flex-col justify-center items-center rounded-lg shadow-lg shadow-slate-300'
             onSubmit={updateUser}
           >
             <h2 className='text-2xl font-semibold mb-4 mt-2'>Update Profile</h2>
-
-            {formErrors.userPhoto && (
-              <div className='input-error text-center'>
-                {formErrors.userPhoto}
-              </div>
-            )}
-
             <div
               className='flex justify-center items-center mb-5'
               onClick={() => (!isFieldDisabled ? imgRef.current?.click() : '')}
             >
               <div
-                className={`h-[120px] w-[120px] rounded-full bg-slate-200 relative border-2 border-slate-400 text-slate-400  ${
+                className={`h-[120px] w-[120px] rounded-full bg-slate-200 relative border-2 border-slate-400 text-slate-400 transition-all duration-200 ease-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed'
                     : 'hover:cursor-pointer hover:border-slate-700 hover:text-slate-700'
                 }`}
               >
-                {formValues.userPhoto ? (
+                {profilePic ? (
                   <Image
-                    src={formValues.userPhoto}
-                    alt={formValues.fullName}
+                    src={profilePic ?? ''}
+                    alt={user.fullName}
                     width={120}
                     height={120}
                     className='rounded-full w-36 object-cover'
@@ -225,13 +171,6 @@ const EditProfile: NextPage & TPageLayout = () => {
               />
             </div>
 
-            {formErrors.username && (
-              <div className='w-full flex'>
-                <div className='w-[40%]'></div>
-                <div className='input-error w-[60%]'>{formErrors.username}</div>
-              </div>
-            )}
-
             <div className='w-full flex items-center justify-center mb-3'>
               <label htmlFor='username' className='w-[40%] px-2 py-1'>
                 Username
@@ -240,9 +179,9 @@ const EditProfile: NextPage & TPageLayout = () => {
                 type='text'
                 id='username'
                 name='username'
-                value={formValues?.username}
+                value={user?.username}
                 disabled={isFieldDisabled}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none ${
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none transition-all duration-200 ease-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed text-slate-500'
                     : 'hover:border-slate-700'
@@ -250,14 +189,6 @@ const EditProfile: NextPage & TPageLayout = () => {
                 onChange={handleInput}
               />
             </div>
-
-            {formErrors.fullName && (
-              <div className='w-full flex'>
-                <div className='w-[40%]'></div>
-                <div className='input-error w-[60%]'>{formErrors.fullName}</div>
-              </div>
-            )}
-
             <div className='w-full flex items-center justify-center mb-3'>
               <label htmlFor='fullName' className='w-[40%] px-2 py-1'>
                 Full Name
@@ -266,9 +197,9 @@ const EditProfile: NextPage & TPageLayout = () => {
                 type='text'
                 id='fullName'
                 name='fullName'
-                value={formValues?.fullName}
+                value={user?.fullName}
                 disabled={isFieldDisabled}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none ${
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none transition-all duration-200 ease-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed text-slate-500'
                     : 'hover:border-slate-700'
@@ -276,7 +207,6 @@ const EditProfile: NextPage & TPageLayout = () => {
                 onChange={handleInput}
               />
             </div>
-
             <div className='w-full flex items-center justify-center mb-5'>
               <label htmlFor='email' className='w-[40%] px-2 py-1'>
                 Email
@@ -285,18 +215,18 @@ const EditProfile: NextPage & TPageLayout = () => {
                 type='text'
                 id='email'
                 name='email'
-                value={formValues?.email}
+                value={user?.email}
                 disabled={true}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none cursor-not-allowed text-slate-500 `}
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none cursor-not-allowed text-slate-500 transition-all duration-200 ease-out`}
               />
             </div>
             <div className='w-full px-2 py-1 flex items-center justify-center mb-3'>
               <button
                 type='button'
-                className={`w-full text-blue-600 border-2 border-blue-600 rounded-md mr-2 outline-none ${
+                className={`w-full text-blue border-2 border-blue rounded-md mr-2 outline-none transition-all duration-200 ease-out ${
                   !isFieldDisabled
                     ? 'cursor-not-allowed'
-                    : 'hover:text-white hover:bg-blue-600'
+                    : 'hover:text-white hover:bg-blue'
                 }`}
                 disabled={!isFieldDisabled}
                 onClick={() => setIsFieldDisabled(false)}
@@ -305,7 +235,7 @@ const EditProfile: NextPage & TPageLayout = () => {
               </button>
               <button
                 type='submit'
-                className={`w-full text-green-700 border-2 border-green-700 rounded-md outline-none ${
+                className={`w-full text-green-700 border-2 border-green-700 rounded-md outline-none transition-all duration-200 ease-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed'
                     : 'hover:text-white hover:bg-green-700'
@@ -329,7 +259,7 @@ export default EditProfile;
 EditProfile.getLayout = (page: any) => {
   return (
     <>
-      <ProtectedRoute role='user'>
+      <ProtectedRoute>
         <Header />
         {page}
         <Footer />

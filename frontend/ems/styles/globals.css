@@ -30,5 +30,5 @@
 }
 
 .input-error {
-  @apply inline-block text-red-600 text-lg;
+  @apply inline-block text-red-600 font-medium text-lg;
 }

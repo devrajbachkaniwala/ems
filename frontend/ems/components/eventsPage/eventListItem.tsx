@@ -6,6 +6,7 @@ import {
 import Link from 'next/link';
 import { FC } from 'react';
 import { dateFormatter } from 'utils/dateFormatter';
+import { isFreeEvent } from 'utils/isFreeEvent';
 
 type TEventListItemProps = {
   event: EventList_events;
@@ -30,8 +31,10 @@ const EventListItem: FC<TEventListItemProps> = ({ event }) => {
                     {dateFormatter(new Date(event.timings[0].date))}
                   </p>
                   <p className='text-slate-600 text-sm'>{`${event.city}, ${event.state}`}</p>
-                  <p className='text-slate-600 text-sm'>
-                    {event.prices[0].currency} {event.prices[0].price}
+                  <p className='text-slate-600 text-sm mt-2'>
+                    {isFreeEvent(event.prices[0].price)
+                      ? 'Free'
+                      : `${event.prices[0].currency} ${event.prices[0].price}`}
                   </p>
                 </div>
                 <div className='w-full md:w-[40%]'>

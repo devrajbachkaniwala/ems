@@ -36,7 +36,7 @@ const UserListItem: FC<TUserListItemProps> = ({
       <td className='flex'>
         <Link href={`/users/${id}`}>
           <a
-            className='px-1 mr-1 text-center w-full border-2 border-blue text-blue hover:text-white hover:bg-blue transition-all duration-200 ease-out font-medium rounded-md leading-4'
+            className='px-1 mr-1 text-center flex justify-center items-center w-full border-2 border-blue text-blue hover:text-white hover:bg-blue transition-all duration-200 ease-out font-medium rounded-md leading-4'
             onClick={() => showLoading(true)}
           >
             Show more

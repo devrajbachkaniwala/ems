@@ -114,6 +114,8 @@ const Login: NextPage & TPageLayout = () => {
   };
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    setErrMsg(null);
+    apolloClient.resetStore();
     try {
       e.preventDefault();
 
@@ -134,12 +136,17 @@ const Login: NextPage & TPageLayout = () => {
 
       const res = await authService.loginUser(formValues);
       sessionStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
       const user = await authService.getUserProfile();
-
-      if (user.id) {
-        store.auth.setUser(user);
-        router.replace('/');
+      if (user.isActive) {
+        if (user.id) {
+          localStorage.setItem('refreshToken', res.refreshToken);
+          store.auth.setUser(user);
+          router.replace('/');
+        }
+      } else {
+        await authService.logout(res.refreshToken);
+        sessionStorage.clear();
+        setErrMsg('Account is Disabled');
       }
     } catch (err: any) {
       setErrMsg(err.message);
@@ -158,10 +165,13 @@ const Login: NextPage & TPageLayout = () => {
     <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
       <form onSubmit={handleLogin} className='form'>
         <h2 className='form-heading'>Login</h2>
-        {errMsg && <span className='input-error'>{errMsg}</span>}
+        {errMsg && <div className='input-error text-center'>{errMsg}</div>}
 
         {formErrors.email && (
-          <span className='input-error'>{formErrors.email}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.email}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='email'>Email</label>
@@ -176,7 +186,10 @@ const Login: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.password && (
-          <span className='input-error'>{formErrors.password}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.password}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='password'>Password</label>

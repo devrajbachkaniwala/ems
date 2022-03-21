@@ -41,9 +41,6 @@ class authService {
         TLoginUser
       >(`${Env.authUrl}/login`, user);
 
-      localStorage.setItem('rToken', res.data.refreshToken);
-      sessionStorage.setItem('aToken', res.data.accessToken);
-
       return res.data;
     } catch (err: any) {
       if (err.response.data.errorCode && err.response.data.message) {
@@ -101,6 +98,25 @@ class authService {
       });
 
       return res.data;
+    } catch (err: any) {
+      if (err.response.data.errorCode && err.response.data.message) {
+        throw new Error(
+          `${err.response.data.errorCode}: ${err.response.data.message}`
+        );
+      }
+      throw err;
+    }
+  }
+
+  async logout(refreshToken: string): Promise<boolean> {
+    try {
+      const res = await axios.post(`${Env.authUrl}/logout`, null, {
+        headers: {
+          authorization: `Bearer ${refreshToken}`
+        }
+      });
+
+      return res.status === 204 ? true : false;
     } catch (err: any) {
       if (err.response.data.errorCode && err.response.data.message) {
         throw new Error(

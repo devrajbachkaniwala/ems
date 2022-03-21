@@ -2,8 +2,14 @@ import { ApolloQueryResult } from '@apollo/client';
 import { apolloClient } from 'app/graphql';
 import axios, { AxiosResponse } from 'axios';
 import { Env } from 'class/Env';
+import { UpdateUserInput } from '__generated__/globalTypes';
+import { UPDATE_USER_PROFILE } from './mutations';
 import { GET_USER_PROFILE } from './queries';
 import { TAccessToken, TLoginUser, TTokens } from './types';
+import {
+  UpdateUserProfile,
+  UpdateUserProfileVariables
+} from './__generated__/UpdateUserProfile';
 import { UserProfile } from './__generated__/UserProfile';
 
 class AuthService {
@@ -64,6 +70,25 @@ class AuthService {
       }
 
       return res.data.user;
+    } catch (err: any) {
+      throw err;
+    }
+  }
+
+  async updateUserProfile(
+    data: UpdateUserInput
+  ): Promise<UpdateUserProfile['updateUser']> {
+    try {
+      const res = await apolloClient.mutate<
+        UpdateUserProfile,
+        UpdateUserProfileVariables
+      >({ mutation: UPDATE_USER_PROFILE, variables: { data } });
+
+      if (!res || !res.data) {
+        throw new Error('user not found');
+      }
+
+      return res.data.updateUser;
     } catch (err: any) {
       throw err;
     }

@@ -1,9 +1,12 @@
+import authService from '@/services/authService';
+import { apolloClient } from 'app/graphql';
 import { useAppSelector } from 'app/hooks';
 import { store } from 'app/stores';
+import { observer } from 'mobx-react-lite';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { MouseEventHandler, useState } from 'react';
 
 const Header: React.FC = () => {
   const [showUserDropDown, setShowUserDropDown] = useState<boolean>(false);
@@ -15,6 +18,24 @@ const Header: React.FC = () => {
     router.pathname === '/login' ? '/register' : '/login';
 
   const loginRegisterText = router.pathname === '/login' ? 'Register' : 'Login';
+
+  const handleLogout: MouseEventHandler<HTMLButtonElement> = async (e) => {
+    try {
+      const res = await authService.logout(
+        localStorage.getItem('refreshToken') ?? ''
+      );
+
+      if (res) {
+        localStorage.clear();
+        sessionStorage.clear();
+        apolloClient.resetStore();
+        store.auth.setUser(undefined);
+        router.replace('/login');
+      }
+    } catch (err: any) {
+      console.log(err);
+    }
+  };
 
   return (
     <header className='h-[10vh] px-6 text-slate-500'>
@@ -29,12 +50,12 @@ const Header: React.FC = () => {
         <ul className='h-full flex flex-row items-center text-slate-700'>
           {store.auth.user?.id ? (
             <li
-              className='relative mr-4 w-[140px] text-center'
+              className='relative mr-4 min-w-[140px] w-fit text-center hover:cursor-pointer'
               onMouseEnter={() => setShowUserDropDown(true)}
               onMouseLeave={() => setShowUserDropDown(false)}
             >
               <div
-                className={`w-full flex justify-between items-center hover:text-blue-600 hover:cursor-pointer ${
+                className={`w-full flex justify-end items-center hover:text-blue-600 hover:cursor-pointer ${
                   showUserDropDown ? 'text-blue-600' : ''
                 }`}
               >
@@ -51,22 +72,24 @@ const Header: React.FC = () => {
                     ''
                   )}
                 </div>
-                <div className='ml-1'>{store.auth.user?.username}</div>
+                <div className='ml-2 transition-all duration-200 ease-out'>
+                  {store.auth.user?.username}
+                </div>
               </div>
               <div className='absolute left-0 right-0 -bottom-2 h-4'>
                 <ul
-                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden ${
+                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out ${
                     showUserDropDown ? 'block' : 'hidden'
                   }`}
                 >
-                  <li className='hover:bg-slate-200 hover:text-blue-600 hover:cursor-pointer'>
+                  <li className='hover:bg-slate-200 hover:text-blue-600 hover:cursor-pointer transition-all duration-200 ease-out'>
                     <Link href={'/my-bookings'}>
                       <a className='inline-block h-full w-full px-2 py-1 leading-5'>
                         My Bookings
                       </a>
                     </Link>
                   </li>
-                  <li className='hover:bg-slate-200 hover:text-blue-600 hover:cursor-pointer'>
+                  <li className='hover:bg-slate-200 hover:text-blue-600 hover:cursor-pointer transition-all duration-200 ease-out'>
                     <Link href={'/edit-profile'}>
                       <a className='inline-block h-full w-full px-2 py-1 leading-5'>
                         Edit Profile
@@ -82,12 +105,12 @@ const Header: React.FC = () => {
 
           {store.auth.user?.organization?.id ? (
             <li
-              className='relative mr-4 w-fit text-center'
+              className='relative mr-4 w-fit text-center hover:cursor-pointer'
               onMouseEnter={() => setShowOrgDropDown(true)}
               onMouseLeave={() => setShowOrgDropDown(false)}
             >
               <div
-                className={`hover:text-blue-600 cursor-pointer ${
+                className={`hover:text-blue-600 cursor-pointer transition-all duration-200 ease-out ${
                   showOrgDropDown ? 'text-blue-600' : ''
                 }`}
               >
@@ -95,11 +118,11 @@ const Header: React.FC = () => {
               </div>
               <div className='absolute left-0 right-0 -bottom-2 h-4'>
                 <ul
-                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden ${
+                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out ${
                     showOrgDropDown ? 'block' : 'hidden'
                   }`}
                 >
-                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600'>
+                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600 transition-all duration-200 ease-out'>
                     <Link
                       href={`/organization/${store.auth.user?.organization?.id}/edit`}
                     >
@@ -108,7 +131,7 @@ const Header: React.FC = () => {
                       </a>
                     </Link>
                   </li>
-                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600'>
+                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600 transition-all duration-200 ease-out'>
                     <Link
                       href={`/organization/${store.auth.user?.organization?.id}/team-members`}
                     >
@@ -117,7 +140,7 @@ const Header: React.FC = () => {
                       </a>
                     </Link>
                   </li>
-                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600'>
+                  <li className='p-2 hover:bg-slate-200 hover:text-blue-600 transition-all duration-200 ease-out'>
                     <Link
                       href={`/organization/${store.auth.user?.organization?.id}/my-events`}
                     >
@@ -134,9 +157,15 @@ const Header: React.FC = () => {
           )}
 
           {store.auth.user?.id ? (
-            <li className='mr-4 '>
-              <Link href={'/events/add'}>
-                <a className='inline-block h-full w-full hover:text-blue-600'>
+            <li className='mr-4 hover:cursor-pointer'>
+              <Link
+                href={
+                  store.auth.user.organization?.id
+                    ? '/events/add'
+                    : '/organization/add'
+                }
+              >
+                <a className='inline-block h-full w-full hover:text-blue-600 transition-all duration-200 ease-out'>
                   Create an event
                 </a>
               </Link>
@@ -147,7 +176,7 @@ const Header: React.FC = () => {
 
           <li className='text-lg'>
             {store.auth.user?.id ? (
-              <button>
+              <button type='button' onClick={handleLogout}>
                 <a className='inline-block px-3 py-1 bg-slate-200 rounded-md hover:bg-slate-300 hover:text-slate-900 focus:outline-none transition-all duration-200 ease-out'>
                   Logout
                 </a>
@@ -166,4 +195,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default observer(Header);

@@ -24,6 +24,8 @@ import {
   EventDetail_eventById_timings
 } from '@/services/eventService/__generated__/EventDetail';
 import { useRouter } from 'next/router';
+import { validate } from 'graphql';
+import { EventValidation } from 'class/eventValidation';
 
 /* type TPrice = {
   price: number;
@@ -36,7 +38,7 @@ const initialPriceState: TPrice = {
   __typename: 'EventPrice',
   id: '',
   price: 0,
-  currency: '',
+  currency: 'INR',
   maxLimit: 0,
   sold: 0
 };
@@ -101,6 +103,13 @@ const initialEventState: TInitialEventState = {
   }
 };
 
+const dateString = (date: Date): string => {
+  const formattedDateString = `${
+    date.getFullYear
+  }-${date.getMonth()}-${date.getDate()}`;
+  return formattedDateString;
+};
+
 type TAddEditEventProps = {
   event?: EventDetail['eventById'];
 };
@@ -124,9 +133,18 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
     event ? event : initialEventState
   );
 
+  const [eventFormErrors, setEventFormErrors] = useState<
+    Partial<TInitialEventState>
+  >({});
+  const [priceFormsError, setPriceFormsError] = useState<Partial<TPrice>[]>([
+    {}
+  ]);
+
+  const [isAllFieldValid, setIsAllFieldValid] = useState<boolean>(false);
+
   /* useEffect(() => {
-    console.log(eventForm);
-  }, [eventForm]); */
+    console.log('changed', isAllFieldValid.current);
+  }, [isAllFieldValid]); */
 
   const [isFieldDisabled, setIsFieldDisabled] = useState<boolean>(!!event);
 
@@ -240,9 +258,112 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
     });
   };
 
+  const setError = (
+    name: keyof TInitialEventState | keyof TPrice,
+    value: string,
+    noError: boolean,
+    form: 'event' | 'price' | 'timing' | 'photo',
+    index?: number
+  ): boolean => {
+    switch (form) {
+      case 'event':
+        setEventFormErrors((prevState) => ({ ...prevState, [name]: [value] }));
+        return noError;
+
+      case 'price':
+        setPriceFormsError((prevState) => {
+          return prevState.map((p, idx) => {
+            if (idx === index) {
+              return {
+                ...p,
+                [name]: value
+              };
+            }
+            return p;
+          });
+        });
+        return noError;
+      default:
+        return false;
+    }
+  };
+
+  const validate = async (): Promise<boolean> => {
+    const isValidName = await EventValidation.eventName(eventForm.name)
+      .then((res) => setError('name', '', res, 'event'))
+      .catch((err) => setError('name', err.message, false, 'event'));
+
+    const isValidDescription = await EventValidation.description(
+      eventForm.description
+    )
+      .then((res) => setError('description', '', res, 'event'))
+      .catch((err) => setError('description', err.message, false, 'event'));
+
+    const isValidCity = await EventValidation.city(eventForm.city)
+      .then((res) => setError('city', '', res, 'event'))
+      .catch((err) => setError('city', err.message, false, 'event'));
+
+    const isValidState = await EventValidation.state(eventForm.state)
+      .then((res) => setError('state', '', res, 'event'))
+      .catch((err) => setError('state', err.message, false, 'event'));
+
+    const isValidCountry = await EventValidation.country(eventForm.country)
+      .then((res) => setError('country', '', res, 'event'))
+      .catch((err) => setError('country', err.message, false, 'event'));
+
+    const isValidVenue = await EventValidation.venue(eventForm.venue)
+      .then((res) => setError('venue', '', res, 'event'))
+      .catch((err) => setError('venue', err.message, false, 'event'));
+
+    const isValidCategory = await EventValidation.category(eventForm.category)
+      .then((res) => setError('category', '', res, 'event'))
+      .catch((err) => setError('category', err.message, false, 'event'));
+
+    let idx = 0;
+    let isAllFieldsValid = false;
+    for (let price of priceForms) {
+      const isValid = await EventValidation.currency(price.currency)
+        .then((res) => setError('currency', '', res, 'price', idx))
+        .catch((err) => setError('currency', err.message, false, 'price', idx));
+      if (!isValid) {
+        isAllFieldsValid = false;
+      } else {
+        isAllFieldsValid = true;
+      }
+      idx += 1;
+    }
+
+    if (
+      !(
+        isValidName &&
+        isValidDescription &&
+        isValidCity &&
+        isValidState &&
+        isValidCountry &&
+        isValidVenue &&
+        isValidCategory &&
+        isAllFieldsValid
+      )
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(eventForm);
+
+    const isValid = await validate();
+
+    if (!isValid) {
+      console.log('validation error');
+      return;
+    } else {
+      console.log('success');
+      console.log(priceForms);
+      return;
+    }
 
     if (isAddMode) {
       try {
@@ -409,8 +530,20 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           return idx !== index;
         });
       });
+
+      setPriceFormsError((prevState) => {
+        return prevState.filter((price, idx) => {
+          return idx !== index;
+        });
+      });
     } else if (isAddMode) {
       setPriceForms((prevState) => {
+        return prevState.filter((price, idx) => {
+          return idx !== index;
+        });
+      });
+
+      setPriceFormsError((prevState) => {
         return prevState.filter((price, idx) => {
           return idx !== index;
         });
@@ -480,6 +613,10 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
         </h2>
         <div className='mx-2'>
           <form name='event' id='eventForm' onSubmit={handleSubmit}>
+            {eventFormErrors.name && (
+              <div className='input-error'>{eventFormErrors.name}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='name' className='w-[40%] px-2 py-1'>
                 Name
@@ -499,6 +636,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.description && (
+              <div className='input-error'>{eventFormErrors.description}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='description' className='w-[40%] px-2 py-1'>
                 Description
@@ -517,6 +659,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.city && (
+              <div className='input-error'>{eventFormErrors.city}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='city' className='w-[40%] px-2 py-1'>
                 City
@@ -536,6 +683,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.state && (
+              <div className='input-error'>{eventFormErrors.state}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='state' className='w-[40%] px-2 py-1'>
                 State
@@ -555,6 +707,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.country && (
+              <div className='input-error'>{eventFormErrors.country}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='country' className='w-[40%] px-2 py-1'>
                 Country
@@ -574,6 +731,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.venue && (
+              <div className='input-error'>{eventFormErrors.venue}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='venue' className='w-[40%] px-2 py-1'>
                 Venue
@@ -592,6 +754,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 disabled={isFieldDisabled}
               />
             </div>
+
+            {eventFormErrors.category && (
+              <div className='input-error'>{eventFormErrors.category}</div>
+            )}
+
             <div className='w-[80%] md:w-[50%] flex justify-between items-center mb-4'>
               <label htmlFor='category' className='w-[40%] px-2 py-1'>
                 Category
@@ -617,7 +784,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
             <div className='flex w-[80%] md:w-[50%] flex-wrap'>
               {priceForms.map((price, index) => {
                 return (
-                  <form key={index} className='w-full'>
+                  <form
+                    key={index}
+                    className='w-full'
+                    onSubmit={(e) => handleSubmit(e)}
+                  >
                     <h3 className='px-2 py-1 font-semibold flex items-center'>
                       <div>Price Plan {index + 1}</div>
                       {index ? (
@@ -657,8 +828,19 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                             : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
                         }`}
                         disabled={isFieldDisabled}
+                        min='0'
                       />
                     </div>
+
+                    {priceFormsError.length &&
+                    priceFormsError[index].currency ? (
+                      <div className='input-error'>
+                        {priceFormsError[index].currency}
+                      </div>
+                    ) : (
+                      ''
+                    )}
+
                     <div className='w-full flex justify-between items-center mb-4'>
                       <label htmlFor='currency' className='w-[40%] px-2 py-1'>
                         Currency
@@ -669,12 +851,13 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         id='currency'
                         value={price.currency}
                         onChange={(event) => handlePriceChange(index, event)}
-                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md transition duration-200 ease-linear ${
+                        className={`w-[60%] px-2 py-1 border-2 border-slate-400 rounded-md uppercase transition duration-200 ease-linear ${
                           isFieldDisabled
                             ? 'cursor-not-allowed'
                             : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
                         }`}
                         disabled={isFieldDisabled}
+                        maxLength={3}
                       />
                     </div>
                     <div className='w-full flex justify-between items-center mb-4'>
@@ -693,8 +876,12 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                             : 'hover:border-slate-700 focus:outline-none focus:border-slate-700'
                         }`}
                         disabled={isFieldDisabled}
+                        min='0'
                       />
                     </div>
+                    <button type='submit' className='hidden'>
+                      Submit
+                    </button>
                   </form>
                 );
               })}
@@ -707,6 +894,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                     ...prevState,
                     initialPriceState
                   ]);
+                  setPriceFormsError((prevState) => [...prevState, {}]);
                 }}
                 className={`ml-2 text-green-700  ${
                   isFieldDisabled

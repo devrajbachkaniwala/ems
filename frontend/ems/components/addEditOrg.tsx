@@ -12,6 +12,8 @@ import { imageValidator } from 'utils/imageValidator';
 import orgService from '@/services/orgService';
 import { GetOrganization_organization } from '@/services/orgService/__generated__/GetOrganization';
 import { useRouter } from 'next/router';
+import { OrgValidation } from 'class/orgValidation';
+import { store } from 'app/stores';
 
 export type TOrganization = {
   name: string;
@@ -22,6 +24,14 @@ export type TOrganization = {
 };
 
 const initialFormValues: TOrganization = {
+  photo: '',
+  name: '',
+  description: '',
+  contactNo: '',
+  email: ''
+};
+
+const initialFormErrors: Partial<TOrganization> = {
   photo: '',
   name: '',
   description: '',
@@ -47,6 +57,9 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
     organization ? organization : initialFormValues
   );
 
+  const [formErrors, setFormErrors] =
+    useState<Partial<TOrganization>>(initialFormErrors);
+
   const [file, setFile] = useState<string>('');
 
   const setOrgPhoto = (imgFile: File) => {
@@ -62,16 +75,16 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
 
   const handleOrgPhoto = (e: ChangeEvent<HTMLInputElement>): void => {
     try {
-      setFormValues({
-        ...formValues,
+      setFormValues((prevState) => ({
+        ...prevState,
         photo: ''
-      });
+      }));
       if (!e.target.files?.length) {
-        /* setIsSubmit(true);
-        setFormErrors({
-          ...formErrors,
-          userPhoto: null,
-        }); */
+        setFormErrors((prevState) => ({
+          ...prevState,
+          photo: 'Organization Photo is required'
+        }));
+
         return;
       }
 
@@ -80,20 +93,17 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
       const isValidImg: boolean = imageValidator(file);
 
       if (isValidImg) {
-        /* setFormErrors({
-          ...formErrors,
-          userPhoto: null,
-        }); */
-        //setIsSubmit(true);
+        setFormErrors((prevState) => ({
+          ...prevState,
+          photo: ''
+        }));
         setOrgPhoto(file);
       }
     } catch (err: any) {
-      /* setFormErrors({
-        ...formErrors,
-        userPhoto: err.message,
-      });
-      setIsSubmit(false); */
-      console.log(err);
+      setFormErrors((prevState) => ({
+        ...prevState,
+        photo: err.message
+      }));
     }
   };
 
@@ -107,22 +117,108 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
     }));
   };
 
+  const validate = async (): Promise<boolean> => {
+    const name = await OrgValidation.orgName(formValues.name)
+      .then((res) => {
+        setFormErrors((prevState) => ({ ...prevState, name: '' }));
+        return res;
+      })
+      .catch((err) => {
+        setFormErrors((prevState) => ({ ...prevState, name: err.message }));
+        return false;
+      });
+
+    const description = await OrgValidation.description(formValues.description)
+      .then((res) => {
+        setFormErrors((prevState) => ({ ...prevState, description: '' }));
+        return res;
+      })
+      .catch((err) => {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          description: err.message
+        }));
+        return false;
+      });
+
+    const contactNo = await OrgValidation.contactNo(formValues.contactNo)
+      .then((res) => {
+        setFormErrors((prevState) => ({ ...prevState, contactNo: '' }));
+        return res;
+      })
+      .catch((err) => {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          contactNo: err.message
+        }));
+        return false;
+      });
+
+    const email = await OrgValidation.email(formValues.email)
+      .then((res) => {
+        setFormErrors((prevState) => ({ ...prevState, email: '' }));
+        return res;
+      })
+      .catch((err) => {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          email: err.message
+        }));
+        return false;
+      });
+
+    const photo = await new Promise((resolve, reject) => {
+      if (!formValues.photo) {
+        setFormErrors((prevState) => ({
+          ...prevState,
+          photo: 'Organization photo is required'
+        }));
+        reject(false);
+      }
+      if (formErrors.photo) {
+        reject(false);
+      }
+      resolve(true);
+    })
+      .then((res) => {
+        setFormErrors((prevState) => ({ ...prevState, photo: '' }));
+        return res;
+      })
+      .catch((err) => err);
+
+    if (!(name && description && contactNo && email && photo)) {
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const isValid = await validate();
+
+    if (!isValid) {
+      console.log('validate error');
+      return;
+    }
+
     if (isAddMode) {
       try {
         const res = await orgService.createOrganization(formValues);
         console.log(res);
         if (res.id) {
-          router.replace(`/organization/${res.id}/edit`);
+          if (store.auth.user) {
+            store.auth.setUser({ ...store.auth.user, organization: res });
+            router.replace(`/organization/${res.id}/edit`);
+          }
         }
       } catch (err: any) {
         console.log(JSON.stringify(err));
       }
     } else {
-      setIsFieldDisabled(true);
       try {
         const res = await orgService.updateOrganization(formValues);
+        setIsFieldDisabled(true);
         console.log(res);
       } catch (err: any) {
         console.log(JSON.stringify(err));
@@ -135,7 +231,10 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
       e.preventDefault();
       const res = await orgService.deleteOrganization();
       if (res) {
-        router.replace('/organization/add');
+        if (store.auth.user) {
+          store.auth.setUser({ ...store.auth.user, organization: null });
+          router.replace('/organization/add');
+        }
       }
     } catch (err: any) {
       console.log(JSON.stringify(err));
@@ -152,6 +251,10 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
           className='flex flex-col justify-center items-center'
           onSubmit={handleSubmit}
         >
+          {formErrors.photo && (
+            <div className='input-error'>{formErrors.photo}</div>
+          )}
+
           <div className='flex justify-center items-center mb-4'>
             <div
               className={`h-[120px] w-[120px] rounded-full bg-slate-200 relative border-2 border-slate-400  text-slate-400  transition duration-200 ease-linear ${
@@ -182,6 +285,13 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
             />
           </div>
 
+          {formErrors.name && (
+            <div className='flex justify-between w-full lg:w-[50%]'>
+              <div className='w-[30%]'></div>
+              <div className='input-error w-[70%]'>{formErrors.name}</div>
+            </div>
+          )}
+
           <div className='flex justify-between w-full lg:w-[50%] mb-4'>
             <label htmlFor='name' className='w-[30%] px-2 py-1'>
               Name
@@ -201,6 +311,16 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
               disabled={isFieldDisabled}
             />
           </div>
+
+          {formErrors.description && (
+            <div className='flex justify-between w-full lg:w-[50%]'>
+              <div className='w-[30%]'></div>
+              <div className='input-error w-[70%]'>
+                {formErrors.description}
+              </div>
+            </div>
+          )}
+
           <div className='flex justify-between w-full lg:w-[50%] mb-4'>
             <label htmlFor='description' className='w-[30%] px-2 py-1'>
               Description
@@ -219,6 +339,14 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
               disabled={isFieldDisabled}
             />
           </div>
+
+          {formErrors.contactNo && (
+            <div className='flex justify-between w-full lg:w-[50%]'>
+              <div className='w-[30%]'></div>
+              <div className='input-error w-[70%]'>{formErrors.contactNo}</div>
+            </div>
+          )}
+
           <div className='flex justify-between w-full lg:w-[50%] mb-4'>
             <label htmlFor='contactNo' className='w-[30%] px-2 py-1'>
               Contact No
@@ -238,6 +366,14 @@ const AddEditOrganization: FC<TAddEditOrganizationProps> = (props) => {
               disabled={isFieldDisabled}
             />
           </div>
+
+          {formErrors.email && (
+            <div className='flex justify-between w-full lg:w-[50%]'>
+              <div className='w-[30%]'></div>
+              <div className='input-error w-[70%]'>{formErrors.email}</div>
+            </div>
+          )}
+
           <div className='flex justify-between w-full lg:w-[50%] mb-4'>
             <label htmlFor='email' className='w-[30%] px-2 py-1'>
               Email

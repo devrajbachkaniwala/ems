@@ -39,6 +39,7 @@ export interface EventList_events {
   city: string;
   state: string;
   country: string;
+  category: string;
   organization: EventList_events_organization;
   photos: EventList_events_photos[] | null;
   timings: EventList_events_timings[] | null;

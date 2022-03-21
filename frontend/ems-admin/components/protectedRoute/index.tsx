@@ -5,11 +5,11 @@ import { observer } from 'mobx-react-lite';
 import { useRouter } from 'next/router';
 import { FC, ReactNode, useEffect, useState } from 'react';
 
-type TProtectedRoute = {
+type TProtectedRouteProps = {
   children: ReactNode;
 };
 
-const ProtectedRoute: FC<TProtectedRoute> = ({ children }) => {
+const ProtectedRoute: FC<TProtectedRouteProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const router = useRouter();

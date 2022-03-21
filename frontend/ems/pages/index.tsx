@@ -5,7 +5,7 @@ import type {
   GetServerSidePropsResult,
   NextPage
 } from 'next';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import eventService from '@/services/eventService';
 import { apolloClient } from 'app/graphql';
@@ -20,7 +20,10 @@ import Image from 'next/image';
 import Footer from 'components/footer';
 import eventStyles from 'styles/event.module.css';
 import Link from 'next/link';
-import { EventList } from '@/services/eventService/__generated__/EventList';
+import {
+  EventList,
+  EventList_events
+} from '@/services/eventService/__generated__/EventList';
 import { dateFormatter } from 'utils/dateFormatter';
 import { store } from 'app/stores';
 import { observer } from 'mobx-react-lite';
@@ -29,8 +32,17 @@ import { TPageLayout } from 'types/pageLayout';
 import { ProtectedRoute } from 'components/protectedRoute';
 
 type THomeProps = {
-  events: EventList['events'];
+  events: EventList_events[];
 };
+
+const eventNavlist = [
+  'all',
+  'today',
+  'free',
+  'music',
+  'food & drink',
+  'charity & causes'
+];
 
 const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
   /* const handleLogout = async () => {
@@ -50,6 +62,71 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
       console.log(err.message);
     }
   }; */
+  const [searchedEventList, setSearchedEventList] =
+    useState<EventList_events[]>(events);
+
+  const [currEventNavIdx, setCurrEventNavIdx] = useState<number>(0);
+
+  const eventNavList = (idx: number) => {
+    setCurrEventNavIdx(idx);
+    switch (idx) {
+      case 0:
+        setSearchedEventList(events);
+        break;
+      case 1:
+        setSearchedEventList(
+          events.filter((event) => {
+            if (event.timings?.length) {
+              const isAvailable = event.timings.find(
+                (timing) =>
+                  new Date(timing.date).getDate() === new Date().getDate()
+              );
+              return isAvailable ? true : false;
+            }
+            return false;
+          })
+        );
+        break;
+      case 2:
+        setSearchedEventList(
+          events.filter((event) => {
+            if (event.prices?.length) {
+              const isAvailable = event.prices.find(
+                (price) => price.price == 0
+              );
+              return isAvailable ? true : false;
+            }
+            return false;
+          })
+        );
+        break;
+      case 3:
+        setSearchedEventList(
+          events.filter((event) =>
+            event.category.toLowerCase().includes('music')
+          )
+        );
+        break;
+      case 4:
+        setSearchedEventList(
+          events.filter(
+            (event) =>
+              event.category.toLowerCase().includes('food') ||
+              event.category.toLowerCase().includes('drink')
+          )
+        );
+        break;
+      case 5:
+        setSearchedEventList(
+          events.filter(
+            (event) =>
+              event.category.toLowerCase().includes('charity') ||
+              event.category.toLowerCase().includes('causes')
+          )
+        );
+        break;
+    }
+  };
 
   return (
     <>
@@ -66,22 +143,35 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
         className='mx-3 sm:mx-7 mt-7 sm:px-7 overflow-auto'
       >
         <ul className='flex flex-row items-stretch text-gray-500 font-semibold'>
-          <li className={`${eventStyles.listItem} ${eventStyles.selected}`}>
+          {eventNavlist.map((navItem, index) => {
+            return (
+              <li
+                key={index}
+                className={`${eventStyles.listItem} capitalize ${
+                  index === currEventNavIdx ? `${eventStyles.selected}` : ''
+                }`}
+                onClick={() => eventNavList(index)}
+              >
+                {navItem}
+              </li>
+            );
+          })}
+          {/* <li className={`${eventStyles.listItem} ${eventStyles.selected}`}>
             All
           </li>
           <li className={eventStyles.listItem}>Today</li>
           <li className={eventStyles.listItem}>Free</li>
           <li className={eventStyles.listItem}>Music</li>
           <li className={eventStyles.listItem}>Food & Drink</li>
-          <li className={eventStyles.listItem}>Charity & Causes</li>
+          <li className={eventStyles.listItem}>Charity & Causes</li> */}
         </ul>
       </nav>
 
       <main className='sm:mx-3 my-14 sm:px-7'>
         <div className='h-fit flex flex-row flex-wrap justify-center lg:justify-start'>
-          {events?.length ? (
+          {searchedEventList?.length ? (
             <>
-              {events.map((event) => {
+              {searchedEventList.map((event) => {
                 return (
                   <div key={event.id}>
                     {event.organization &&
@@ -170,7 +260,7 @@ export const getServerSideProps: GetServerSideProps<{
     console.log(err);
     return {
       props: {
-        events: null
+        events: []
       }
     };
   }

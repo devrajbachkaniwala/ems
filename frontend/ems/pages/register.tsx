@@ -243,10 +243,10 @@ const Register: NextPage & TPageLayout = () => {
     <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
       <form className='form' onSubmit={handleSubmit}>
         <h2 className='form-heading'>Register</h2>
-        {errMsg && <span className='input-error'>{errMsg}</span>}
+        {errMsg && <div className='input-error text-center'>{errMsg}</div>}
 
         {formErrors.userPhoto && (
-          <span className='input-error'>{formErrors.userPhoto}</span>
+          <div className='input-error text-center'>{formErrors.userPhoto}</div>
         )}
 
         <div className='flex justify-center items-center mb-5'>
@@ -275,7 +275,10 @@ const Register: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.username && (
-          <span className='input-error'>{formErrors.username}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.username}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='username' className=''>
@@ -293,7 +296,10 @@ const Register: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.fullName && (
-          <span className='input-error'>{formErrors.fullName}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.fullName}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='fullName'>Full Name</label>
@@ -309,7 +315,10 @@ const Register: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.email && (
-          <span className='input-error'>{formErrors.email}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.email}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='email'>Email</label>
@@ -325,7 +334,10 @@ const Register: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.password && (
-          <span className='input-error'>{formErrors.password}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>{formErrors.password}</div>
+          </div>
         )}
         <div className='form-group'>
           <label htmlFor='password'>Password</label>
@@ -341,7 +353,12 @@ const Register: NextPage & TPageLayout = () => {
         </div>
 
         {formErrors.confirmPassword && (
-          <span className='input-error'>{formErrors.confirmPassword}</span>
+          <div className='w-full flex justify-between'>
+            <div></div>
+            <div className='input-error w-[200.8px]'>
+              {formErrors.confirmPassword}
+            </div>
+          </div>
         )}
 
         <div className='form-group'>
