@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import PriceForm from 'components/createEventPage/priceForm';
 import { NextPage } from 'next';
 import {
@@ -38,7 +39,7 @@ const initialPriceState: TPrice = {
   __typename: 'EventPrice',
   id: '',
   price: 0,
-  currency: 'INR',
+  currency: 'inr',
   maxLimit: 0,
   sold: 0
 };
@@ -103,13 +104,6 @@ const initialEventState: TInitialEventState = {
   }
 };
 
-const dateString = (date: Date): string => {
-  const formattedDateString = `${
-    date.getFullYear
-  }-${date.getMonth()}-${date.getDate()}`;
-  return formattedDateString;
-};
-
 type TAddEditEventProps = {
   event?: EventDetail['eventById'];
 };
@@ -139,8 +133,14 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   const [priceFormsError, setPriceFormsError] = useState<Partial<TPrice>[]>([
     {}
   ]);
+  const [timingFormsError, setTimingFormsError] = useState<Partial<TTiming>[]>([
+    {}
+  ]);
+  const [photoFormsError, setPhotoFormsError] = useState<Partial<TPhoto>[]>([
+    {}
+  ]);
 
-  const [isAllFieldValid, setIsAllFieldValid] = useState<boolean>(false);
+  //const [isAllFieldValid, setIsAllFieldValid] = useState<boolean>(false);
 
   /* useEffect(() => {
     console.log('changed', isAllFieldValid.current);
@@ -217,11 +217,17 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
         });
       });
       if (!e.target.files?.length) {
-        /* setIsSubmit(true);
-        setFormErrors({
-          ...formErrors,
-          userPhoto: null,
-        }); */
+        setPhotoFormsError((prevState) => {
+          return prevState.map((photo, idx) => {
+            if (idx === index) {
+              return {
+                ...photo,
+                photo: 'Photo is required'
+              };
+            }
+            return photo;
+          });
+        });
         return;
       }
 
@@ -230,19 +236,33 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
       const isValidImg: boolean = imageValidator(file);
 
       if (isValidImg) {
-        /* setFormErrors({
-          ...formErrors,
-          userPhoto: null,
-        }); */
-        //setIsSubmit(true);
+        setPhotoFormsError((prevState) => {
+          return prevState.map((photo, idx) => {
+            if (idx === index) {
+              return {
+                ...photo,
+                photo: ''
+              };
+            }
+            return photo;
+          });
+        });
+
         setEventPhoto(file, index);
       }
     } catch (err: any) {
-      /* setFormErrors({
-        ...formErrors,
-        userPhoto: err.message,
+      setPhotoFormsError((prevState) => {
+        return prevState.map((photo, idx) => {
+          if (idx === index) {
+            return {
+              ...photo,
+              photo: err.message
+            };
+          }
+          return photo;
+        });
       });
-      setIsSubmit(false); */
+
       console.log(err);
     }
   };
@@ -259,7 +279,11 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   };
 
   const setError = (
-    name: keyof TInitialEventState | keyof TPrice,
+    name:
+      | keyof TInitialEventState
+      | keyof TPrice
+      | keyof TTiming
+      | keyof TPhoto,
     value: string,
     noError: boolean,
     form: 'event' | 'price' | 'timing' | 'photo',
@@ -272,6 +296,34 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
 
       case 'price':
         setPriceFormsError((prevState) => {
+          return prevState.map((p, idx) => {
+            if (idx === index) {
+              return {
+                ...p,
+                [name]: value
+              };
+            }
+            return p;
+          });
+        });
+        return noError;
+
+      case 'timing':
+        setTimingFormsError((prevState) => {
+          return prevState.map((t, idx) => {
+            if (idx === index) {
+              return {
+                ...t,
+                [name]: value
+              };
+            }
+            return t;
+          });
+        });
+        return noError;
+
+      case 'photo':
+        setPhotoFormsError((prevState) => {
           return prevState.map((p, idx) => {
             if (idx === index) {
               return {
@@ -320,15 +372,85 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
       .catch((err) => setError('category', err.message, false, 'event'));
 
     let idx = 0;
-    let isAllFieldsValid = false;
+    let isPriceFieldsValid = false;
     for (let price of priceForms) {
       const isValid = await EventValidation.currency(price.currency)
         .then((res) => setError('currency', '', res, 'price', idx))
         .catch((err) => setError('currency', err.message, false, 'price', idx));
       if (!isValid) {
-        isAllFieldsValid = false;
+        isPriceFieldsValid = false;
+        break;
       } else {
-        isAllFieldsValid = true;
+        isPriceFieldsValid = true;
+      }
+      idx += 1;
+    }
+
+    idx = 0;
+    let isTimingFieldsValid = false;
+    for (let timing of timingForms) {
+      const isValidDate = await EventValidation.date(timing.date)
+        .then((res) => setError('date', '', res, 'timing', idx))
+        .catch((err) => setError('date', err.message, false, 'timing', idx));
+
+      const isValidStartTime = await EventValidation.startTime(timing.startTime)
+        .then((res) => setError('startTime', '', res, 'timing', idx))
+        .catch((err) =>
+          setError('startTime', err.message, false, 'timing', idx)
+        );
+
+      const isValidEndTime = await EventValidation.endTime(timing.endTime)
+        .then((res) => setError('endTime', '', res, 'timing', idx))
+        .catch((err) => setError('endTime', err.message, false, 'timing', idx));
+
+      const isValidTimeDifference = await EventValidation.timeDifference(
+        timing.startTime,
+        timing.endTime
+      )
+        .then((res) => setError('startTime', '', res, 'timing', idx))
+        .catch((err) =>
+          setError('startTime', err.message, false, 'timing', idx)
+        );
+
+      if (
+        !(
+          isValidDate &&
+          isValidStartTime &&
+          isValidEndTime &&
+          isValidTimeDifference
+        )
+      ) {
+        isTimingFieldsValid = false;
+        break;
+      } else {
+        isTimingFieldsValid = true;
+      }
+      idx += 1;
+    }
+
+    idx = 0;
+    let isPhotoFieldsValid = false;
+    for (let photo of photoForms) {
+      const isValidPhoto = await new Promise(
+        (
+          resolve: (value: boolean) => void,
+          reject: (value: string) => void
+        ) => {
+          if (!photo.photo) {
+            reject('Photo is required');
+          }
+
+          resolve(true);
+        }
+      )
+        .then((res) => setError('photo', '', res, 'photo', idx))
+        .catch((err) => setError('photo', err, false, 'photo', idx));
+
+      if (!isValidPhoto) {
+        isPhotoFieldsValid = false;
+        break;
+      } else {
+        isPhotoFieldsValid = true;
       }
       idx += 1;
     }
@@ -342,7 +464,9 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
         isValidCountry &&
         isValidVenue &&
         isValidCategory &&
-        isAllFieldsValid
+        isPriceFieldsValid &&
+        isTimingFieldsValid &&
+        isPhotoFieldsValid
       )
     ) {
       return false;
@@ -358,10 +482,6 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
 
     if (!isValid) {
       console.log('validation error');
-      return;
-    } else {
-      console.log('success');
-      console.log(priceForms);
       return;
     }
 
@@ -440,7 +560,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           ...restEvent
         } = eventForm;
         const eventRes = await eventService.updateEventById(eventId, restEvent);
-        priceForms.map(async (p) => {
+        priceForms.map(async (p, idx) => {
           try {
             const { __typename, id, sold, ...restPrice } = p;
             console.log(`priceId: ${id}`);
@@ -453,6 +573,17 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                   maxLimit: +restPrice.maxLimit
                 }
               );
+              setPriceForms((prevState) => {
+                return prevState.map((p, index) => {
+                  if (index === idx) {
+                    return {
+                      ...p,
+                      ...priceRes
+                    };
+                  }
+                  return p;
+                });
+              });
             } else {
               const priceRes = await eventPriceService.updateEventPriceById(
                 eventId,
@@ -471,7 +602,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           }
         });
 
-        timingForms.map(async (timing) => {
+        timingForms.map(async (timing, idx) => {
           try {
             const { __typename, id, ...restTiming } = timing;
             if (!id) {
@@ -480,6 +611,17 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                   eventId,
                   restTiming
                 );
+              setTimingForms((prevState) => {
+                return prevState.map((t, index) => {
+                  if (index === idx) {
+                    return {
+                      ...t,
+                      ...timingRes
+                    };
+                  }
+                  return t;
+                });
+              });
             } else {
               const timingRes = await eventTimingService.updateEventTimingById(
                 eventId,
@@ -492,7 +634,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           }
         });
 
-        photoForms.map(async (p) => {
+        photoForms.map(async (p, idx) => {
           try {
             const { __typename, id, photo } = p;
             if (!id) {
@@ -500,6 +642,17 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                 eventId,
                 photo
               );
+              setPhotoForms((prevState) => {
+                return prevState.map((pic, index) => {
+                  if (index === idx) {
+                    return {
+                      ...pic,
+                      ...photoRes
+                    };
+                  }
+                  return pic;
+                });
+              });
             } else {
               const photoRes = await eventPhotoService.updateEventPhotoById(
                 eventId,
@@ -519,7 +672,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   };
 
   const removePriceById = async (index: number, priceId?: string) => {
-    if (priceId && !isAddMode) {
+    if (priceId) {
       const res = await eventPriceService.removeEventPriceById(
         eventId,
         priceId
@@ -536,7 +689,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           return idx !== index;
         });
       });
-    } else if (isAddMode) {
+    } else {
       setPriceForms((prevState) => {
         return prevState.filter((price, idx) => {
           return idx !== index;
@@ -552,7 +705,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   };
 
   const removeTimingById = async (index: number, timingId?: string) => {
-    if (timingId && !isAddMode) {
+    if (timingId) {
       const res = await eventTimingService.removeEventTimingById(
         eventId,
         timingId
@@ -563,8 +716,20 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           return idx !== index;
         });
       });
-    } else if (isAddMode) {
+
+      setTimingFormsError((prevState) => {
+        return prevState.filter((timing, idx) => {
+          return idx !== index;
+        });
+      });
+    } else {
       setTimingForms((prevState) => {
+        return prevState.filter((timing, idx) => {
+          return idx !== index;
+        });
+      });
+
+      setTimingFormsError((prevState) => {
         return prevState.filter((timing, idx) => {
           return idx !== index;
         });
@@ -573,7 +738,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   };
 
   const removePhotoById = async (index: number, photoId?: string) => {
-    if (photoId && !isAddMode) {
+    if (photoId) {
       const res = await eventPhotoService.removeEventPhotoById(
         eventId,
         photoId
@@ -584,8 +749,20 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
           return idx !== index;
         });
       });
-    } else if (isAddMode) {
+
+      setPhotoFormsError((prevState) => {
+        return prevState.filter((photo, idx) => {
+          return idx !== index;
+        });
+      });
+    } else {
       setPhotoForms((prevState) => {
+        return prevState.filter((photo, idx) => {
+          return idx !== index;
+        });
+      });
+
+      setPhotoFormsError((prevState) => {
         return prevState.filter((photo, idx) => {
           return idx !== index;
         });
@@ -606,7 +783,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
   };
 
   return (
-    <div className='min-h-[80vh]  text-slate-700'>
+    <div className='min-h-[80vh] text-slate-700'>
       <div className='w-full md:w-4/5 h-full mb-4 mx-auto'>
         <h2 className='text-center text-2xl font-semibold my-5'>
           {isAddMode ? 'Create an event' : 'Update an event'}
@@ -833,7 +1010,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                     </div>
 
                     {priceFormsError.length &&
-                    priceFormsError[index].currency ? (
+                    priceFormsError[index]?.currency ? (
                       <div className='input-error'>
                         {priceFormsError[index].currency}
                       </div>
@@ -913,7 +1090,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
             <div className='flex w-[80%] md:w-[50%] flex-wrap'>
               {timingForms.map((timing, index) => {
                 return (
-                  <form key={index} className='w-full'>
+                  <form key={index} className='w-full' onSubmit={handleSubmit}>
                     <h3 className='px-2 py-1 font-semibold flex items-center'>
                       <div>Timing {index + 1}</div>
                       {index ? (
@@ -937,6 +1114,16 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         ''
                       )}
                     </h3>
+
+                    {timingFormsError.length &&
+                    timingFormsError[index]?.date ? (
+                      <div className='input-error'>
+                        {timingFormsError[index].date}
+                      </div>
+                    ) : (
+                      ''
+                    )}
+
                     <div className='w-full flex justify-between items-center mb-4'>
                       <label htmlFor='date' className='w-[40%] px-2 py-1'>
                         Date
@@ -955,6 +1142,16 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         disabled={isFieldDisabled}
                       />
                     </div>
+
+                    {timingFormsError.length &&
+                    timingFormsError[index]?.startTime ? (
+                      <div className='input-error'>
+                        {timingFormsError[index].startTime}
+                      </div>
+                    ) : (
+                      ''
+                    )}
+
                     <div className='w-full flex justify-between items-center mb-4'>
                       <label htmlFor='startTime' className='w-[40%] px-2 py-1'>
                         Start Time
@@ -973,6 +1170,16 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         disabled={isFieldDisabled}
                       />
                     </div>
+
+                    {timingFormsError.length &&
+                    timingFormsError[index]?.endTime ? (
+                      <div className='input-error'>
+                        {timingFormsError[index].endTime}
+                      </div>
+                    ) : (
+                      ''
+                    )}
+
                     <div className='w-full flex justify-between items-center mb-4'>
                       <label htmlFor='endTime' className='w-[40%] px-2 py-1'>
                         End Time
@@ -991,6 +1198,9 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         disabled={isFieldDisabled}
                       />
                     </div>
+                    <button type='submit' className='hidden'>
+                      Submit
+                    </button>
                   </form>
                 );
               })}
@@ -1003,6 +1213,8 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                     ...prevState,
                     initialTimingState
                   ]);
+
+                  setTimingFormsError((prevState) => [...prevState, {}]);
                 }}
                 className={`ml-2 text-green-700 ${
                   isFieldDisabled
@@ -1022,8 +1234,16 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
               {photoForms.map((photo, index) => {
                 return (
                   <form key={index} className='w-full'>
+                    {photoFormsError.length && photoFormsError[index]?.photo ? (
+                      <div className='input-error'>
+                        {photoFormsError[index].photo}
+                      </div>
+                    ) : (
+                      ''
+                    )}
+
                     <h3 className='px-2 py-1 font-semibold flex items-center'>
-                      <div>Photo {index + 1}</div>
+                      <div>Photo {/* index + 1 */}</div>
                       {index ? (
                         <button
                           type='button'
@@ -1045,6 +1265,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                         ''
                       )}
                     </h3>
+
                     <div className='h-[240px] w-full mb-4 bg-slate-200 relative'>
                       {photo.photo ? (
                         <img
@@ -1078,7 +1299,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
               })}
             </div>
 
-            <div>
+            {/* <div>
               <button
                 type='button'
                 onClick={() => {
@@ -1086,6 +1307,8 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
                     ...prevState,
                     initialPhotoState
                   ]);
+
+                  setPhotoFormsError((prevState) => [...prevState, {}]);
                 }}
                 className={`ml-2 text-green-700 ${
                   isFieldDisabled
@@ -1097,7 +1320,7 @@ const AddEditEvent: NextPage<TAddEditEventProps> = (props) => {
               >
                 <MdAddCircleOutline className='text-3xl' />
               </button>
-            </div>
+            </div> */}
           </div>
 
           <div className='w-[80%] md:w-[50%] flex justify-center'>

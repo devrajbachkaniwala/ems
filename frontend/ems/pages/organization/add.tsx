@@ -4,6 +4,7 @@ import { store } from 'app/stores';
 import AddEditOrg from 'components/addEditOrg';
 import Footer from 'components/footer';
 import Header from 'components/header';
+import LoadingSpinner from 'components/loadingSpinner';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -37,7 +38,11 @@ const AddOrganization: NextPage & TPageLayout = () => {
   }, [router]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

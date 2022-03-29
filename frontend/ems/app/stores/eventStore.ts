@@ -4,14 +4,14 @@ import {
   UserProfile_user
 } from '@/services/authService/__generated__/UserProfile';
 import eventService from '@/services/eventService';
-import { EventsList_events } from '@/services/eventService/__generated__/EventsList';
+import { EventList_events } from '@/services/eventService/__generated__/EventList';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { TTokens } from 'types/token';
 import { TLoginUser } from 'types/user';
 
 export class EventStore {
   loading: boolean = false;
-  events: EventsList_events[] = [];
+  events: EventList_events[] = [];
   error: string | null = null;
 
   constructor() {
@@ -27,7 +27,7 @@ export class EventStore {
     this.loading = true;
     this.events = [];
     try {
-      const res: EventsList_events[] = await eventService.getAllEvents();
+      const res: EventList_events[] = await eventService.getAllEvents();
       runInAction(() => {
         this.loading = false;
         this.events = res;
@@ -42,7 +42,7 @@ export class EventStore {
     }
   }
 
-  setEvents(events: EventsList_events[]) {
+  setEvents(events: EventList_events[]) {
     this.loading = false;
     this.events = events;
     this.error = null;

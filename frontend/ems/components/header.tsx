@@ -38,7 +38,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className='h-[10vh] px-6 text-slate-500'>
+    <header className='h-[10vh] px-6 text-slate-500 fade-in'>
       <nav className='h-full flex items-center'>
         <h2 className='flex-grow'>
           <Link href='/'>
@@ -78,7 +78,7 @@ const Header: React.FC = () => {
               </div>
               <div className='absolute left-0 right-0 -bottom-2 h-4'>
                 <ul
-                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out ${
+                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out fade-in ${
                     showUserDropDown ? 'block' : 'hidden'
                   }`}
                 >
@@ -118,7 +118,7 @@ const Header: React.FC = () => {
               </div>
               <div className='absolute left-0 right-0 -bottom-2 h-4'>
                 <ul
-                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out ${
+                  className={`absolute left-0 right-0 top-4 bg-slate-100 rounded-md overflow-hidden transition-all duration-200 ease-out fade-in ${
                     showOrgDropDown ? 'block' : 'hidden'
                   }`}
                 >

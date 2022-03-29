@@ -396,8 +396,9 @@ export const getServerSideProps: GetServerSideProps<{
   } catch (err: any) {
     console.log(err);
     return {
-      props: {
-        event: null
+      redirect: {
+        destination: '/events',
+        permanent: false
       }
     };
   }

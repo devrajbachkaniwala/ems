@@ -233,14 +233,14 @@ const Register: NextPage & TPageLayout = () => {
 
   if (isLoading) {
     return (
-      <div>
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
+    <section className='min-h-[80vh] overflow-auto py-4 flex justify-center items-center fade-in'>
       <form className='form' onSubmit={handleSubmit}>
         <h2 className='form-heading'>Register</h2>
         {errMsg && <div className='input-error text-center'>{errMsg}</div>}
@@ -251,7 +251,7 @@ const Register: NextPage & TPageLayout = () => {
 
         <div className='flex justify-center items-center mb-5'>
           <div
-            className='h-[120px] w-[120px] rounded-full bg-slate-200 relative hover:cursor-pointer border-2 border-slate-400 hover:border-slate-700 text-slate-400 hover:text-slate-700'
+            className='h-[120px] w-[120px] rounded-full bg-slate-200 relative hover:cursor-pointer border-2 border-slate-400 hover:border-slate-700 text-slate-400 hover:text-slate-700 transition-all duration-200 ease-in-out'
             onClick={onImgClick}
           >
             {formValues.userPhoto && (

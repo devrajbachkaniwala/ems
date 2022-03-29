@@ -15,6 +15,7 @@ import { NextPage } from 'next';
 import { TPageLayout } from 'types/pageLayout';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { store } from 'app/stores';
+import LoadingSpinner from 'components/loadingSpinner';
 
 /* type TTeamMember = {
   id: number;
@@ -82,32 +83,6 @@ const TeamMembers: NextPage & TPageLayout = () => {
   const router = useRouter();
 
   useEffect(() => {
-    /* authService
-      .getUserProfile()
-      .then((user) => {
-        if (!user.organization?.id) {
-          router.replace('/organization/add');
-          return;
-        }
-        orgService
-          .getOrgTeamMembers()
-          .then((org) => {
-            if (user.organization?.id === org.id) {
-              setUserId(user.id);
-              setIsLoading(false);
-              setTeamMembers(org.teamMembers);
-            } else {
-              console.log('User org does not match team member org');
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      })
-      .catch((err) => {
-        console.log(err);
-        router.replace('/login');
-      }); */
     orgService
       .getOrgTeamMembers()
       .then((org) => {
@@ -121,8 +96,14 @@ const TeamMembers: NextPage & TPageLayout = () => {
   }, []);
 
   const addTeamMember = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrMsg('');
+    if (!emailInput) {
+      setErrMsg('Email is required');
+      return;
+    }
+
     try {
-      e.preventDefault();
       const res = await orgService.addTeamMember(emailInput);
 
       if (res.id) {
@@ -163,14 +144,20 @@ const TeamMembers: NextPage & TPageLayout = () => {
   };
 
   if (!teamMembers?.length && isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div
+        className={`min-h-[80vh] overflow-auto flex justify-center fade-in-out`}
+      >
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
-    <div className='min-h-[80vh] overflow-auto'>
+    <div className={`min-h-[80vh] overflow-auto`}>
       <div className='min-w-[625px] sm:w-full lg:w-4/5 mx-auto text-slate-700 overflow-auto'>
         <div className='flex flex-col justify-center items-center'>
-          {errMsg && <span>{errMsg}</span>}
+          {errMsg && <span className='input-error'>{errMsg}</span>}
           <form action='POST' onSubmit={addTeamMember}>
             <div className='flex'>
               <input
@@ -213,7 +200,7 @@ const TeamMembers: NextPage & TPageLayout = () => {
                 return (
                   <article
                     key={teamMember.id}
-                    className='flex items-center p-2 my-2 justify-between w-full xl:w-[70%] border-b-2 border-slate-400 rounded-md hover:shadow-md hover:shadow-slate-400 transition duration-200 ease-linear'
+                    className='flex items-center p-2 my-2 justify-between w-full xl:w-[70%] border-b-2 border-slate-400 rounded-md hover:shadow-md hover:shadow-slate-400 transition duration-200 ease-linear fade-in'
                   >
                     <div className='w-[20%] flex justify-center items-center'>
                       <img
@@ -239,9 +226,9 @@ const TeamMembers: NextPage & TPageLayout = () => {
                           : 'hover:text-white hover:bg-red-600'
                       }`}
                       disabled={!!(userId && userId === teamMember.user?.id)}
-                      onClick={() =>
-                        removeTeamMember(teamMember.user?.email ?? '')
-                      }
+                      onClick={() => {
+                        removeTeamMember(teamMember.user?.email ?? '');
+                      }}
                     >
                       {' '}
                       <FaTrashAlt className='text-lg mr-1' /> Remove

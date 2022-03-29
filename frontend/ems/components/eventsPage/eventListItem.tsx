@@ -22,7 +22,7 @@ const EventListItem: FC<TEventListItemProps> = ({ event }) => {
         event.photos?.length && (
           <Link href={`/events/${event.id}`} passHref>
             <div className='w-full'>
-              <article className='flex flex-col-reverse md:flex-row my-6 max-w-[720px] bg-slate-100 rounded-md overflow-hidden hover:shadow-lg hover:cursor-pointer transition duration-200 ease-linear'>
+              <article className='flex flex-col-reverse md:flex-row my-6 max-w-[720px] md:w-[720px] bg-slate-100 rounded-md overflow-hidden hover:shadow-lg hover:cursor-pointer transition duration-200 ease-linear'>
                 <div className='w-full md:w-[60%] px-4 py-3'>
                   <h2 className='text-lg text-slate-800 font-bold'>
                     {event.name}
@@ -30,12 +30,16 @@ const EventListItem: FC<TEventListItemProps> = ({ event }) => {
                   <p className='text-orange-600 font-bold my-2'>
                     {dateFormatter(new Date(event.timings[0].date))}
                   </p>
-                  <p className='text-slate-600 text-sm'>{`${event.city}, ${event.state}`}</p>
-                  <p className='text-slate-600 text-sm mt-2'>
-                    {isFreeEvent(event.prices[0].price)
-                      ? 'Free'
-                      : `${event.prices[0].currency} ${event.prices[0].price}`}
-                  </p>
+                  <p className='text-slate-600 text-sm capitalize'>{`${event.city}, ${event.state}, ${event.country}`}</p>
+                  <div className='text-slate-600 text-sm mt-2'>
+                    {isFreeEvent(event.prices[0].price) ? (
+                      <div>Free</div>
+                    ) : (
+                      <div className='uppercase'>
+                        {`${event.prices[0].currency} ${event.prices[0].price}`}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className='w-full md:w-[40%]'>
                   <img

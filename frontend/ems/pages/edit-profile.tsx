@@ -3,6 +3,7 @@ import { store } from 'app/stores';
 import { UserValidation } from 'class/UserValidation';
 import Footer from 'components/footer';
 import Header from 'components/header';
+import LoadingSpinner from 'components/loadingSpinner';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { NextPage } from 'next';
 import Image from 'next/image';
@@ -172,13 +173,17 @@ const EditProfile: NextPage & TPageLayout = () => {
   };
 
   if (!formValues) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className=''>
       {formValues ? (
-        <div className='w-full sm:w-4/5 sm:mx-auto min-h-[80vh] overflow-auto  text-slate-700 flex flex-col items-center'>
+        <div className='w-full sm:w-4/5 sm:mx-auto min-h-[80vh] overflow-auto text-slate-700 flex flex-col items-center'>
           <form
             className='w-full sm:w-[400px] px-2 flex flex-col justify-center items-center rounded-lg shadow-lg shadow-slate-300'
             onSubmit={updateUser}
@@ -196,7 +201,7 @@ const EditProfile: NextPage & TPageLayout = () => {
               onClick={() => (!isFieldDisabled ? imgRef.current?.click() : '')}
             >
               <div
-                className={`h-[120px] w-[120px] rounded-full bg-slate-200 relative border-2 border-slate-400 text-slate-400  ${
+                className={`h-[120px] w-[120px] rounded-full bg-slate-200 relative border-2 border-slate-400 text-slate-400 transition-all duration-200 ease-in-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed'
                     : 'hover:cursor-pointer hover:border-slate-700 hover:text-slate-700'
@@ -242,7 +247,7 @@ const EditProfile: NextPage & TPageLayout = () => {
                 name='username'
                 value={formValues?.username}
                 disabled={isFieldDisabled}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none ${
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none transition-all duration-200 ease-in-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed text-slate-500'
                     : 'hover:border-slate-700'
@@ -268,7 +273,7 @@ const EditProfile: NextPage & TPageLayout = () => {
                 name='fullName'
                 value={formValues?.fullName}
                 disabled={isFieldDisabled}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none ${
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none transition-all duration-200 ease-in-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed text-slate-500'
                     : 'hover:border-slate-700'
@@ -287,13 +292,13 @@ const EditProfile: NextPage & TPageLayout = () => {
                 name='email'
                 value={formValues?.email}
                 disabled={true}
-                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none cursor-not-allowed text-slate-500 `}
+                className={`w-[60%] px-2 py-1 bg-slate-100 border-2 border-slate-400 rounded-xl outline-none cursor-not-allowed text-slate-500 transition-all duration-200 ease-in-out`}
               />
             </div>
             <div className='w-full px-2 py-1 flex items-center justify-center mb-3'>
               <button
                 type='button'
-                className={`w-full text-blue-600 border-2 border-blue-600 rounded-md mr-2 outline-none ${
+                className={`w-full text-blue-600 border-2 border-blue-600 rounded-md mr-2 outline-none transition-all duration-200 ease-in-out ${
                   !isFieldDisabled
                     ? 'cursor-not-allowed'
                     : 'hover:text-white hover:bg-blue-600'
@@ -305,7 +310,7 @@ const EditProfile: NextPage & TPageLayout = () => {
               </button>
               <button
                 type='submit'
-                className={`w-full text-green-700 border-2 border-green-700 rounded-md outline-none ${
+                className={`w-full text-green-700 border-2 border-green-700 rounded-md outline-none transition-all duration-200 ease-in-out ${
                   isFieldDisabled
                     ? 'cursor-not-allowed'
                     : 'hover:text-white hover:bg-green-700'

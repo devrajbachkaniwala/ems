@@ -155,14 +155,14 @@ const Login: NextPage & TPageLayout = () => {
 
   if (isLoading) {
     return (
-      <div>
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <section className='min-h-[80vh] overflow-auto flex justify-center items-center'>
+    <section className='min-h-[80vh] overflow-auto flex justify-center items-center fade-in'>
       <form onSubmit={handleLogin} className='form'>
         <h2 className='form-heading'>Login</h2>
         {errMsg && <div className='input-error text-center'>{errMsg}</div>}

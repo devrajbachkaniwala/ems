@@ -10,6 +10,7 @@ import { TPageLayout } from 'types/pageLayout';
 import Header from 'components/header';
 import Footer from 'components/footer';
 import { ProtectedRoute } from 'components/protectedRoute';
+import LoadingSpinner from 'components/loadingSpinner';
 
 /* type TEditOrganizationProps = {
   organization: GetOrganization['organization'];
@@ -38,7 +39,11 @@ const EditOrganization: NextPage & TPageLayout = () => {
   }, [orgId, router]);
 
   if (!org && isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

@@ -45,23 +45,6 @@ const eventNavlist = [
 ];
 
 const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
-  /* const handleLogout = async () => {
-    const res = await axios.post(`${Env.authUrl}/logout`, null, {
-      withCredentials: true
-    });
-    console.log(res.status);
-  }; */
-
-  /* const onClick = async () => {
-    try {
-      //const res = await tokenService.getNewAccessToken(tokenClass.getRefreshTokenFromLocalStorage());
-      //setAuthorizationHeader(res.accessToken);
-      console.log(apolloClient.link);
-      const result = await userService.getUserProfile();
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }; */
   const [searchedEventList, setSearchedEventList] =
     useState<EventList_events[]>(events);
 
@@ -129,7 +112,7 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
   };
 
   return (
-    <>
+    <div>
       <figure aria-label='landing-page-photo'>
         <img
           src={'/images/landing-page-photo.jpg'}
@@ -140,7 +123,7 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
 
       <nav
         aria-label='event-navigation'
-        className='mx-3 sm:mx-7 mt-7 sm:px-7 overflow-auto'
+        className='mx-3 sm:mx-7 mt-7 sm:px-7 overflow-auto fade-in'
       >
         <ul className='flex flex-row items-stretch text-gray-500 font-semibold'>
           {eventNavlist.map((navItem, index) => {
@@ -167,24 +150,27 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
         </ul>
       </nav>
 
-      <main className='sm:mx-3 my-14 sm:px-7'>
-        <div className='h-fit flex flex-row flex-wrap justify-center lg:justify-start'>
+      <main className='sm:mx-3 my-14 sm:px-7 fade-in'>
+        <div className='h-fit flex flex-row flex-wrap justify-start '>
           {searchedEventList?.length ? (
             <>
               {searchedEventList.map((event) => {
                 return (
-                  <div key={event.id}>
+                  <div
+                    key={event.id}
+                    className='w-full md:w-[50%] lg:w-[33%] px-2 flex justify-center fade-in'
+                  >
                     {event.organization &&
                       event.prices?.length &&
                       event.photos?.length &&
                       event.timings?.length && (
                         <Link href={`/events/${event.id}`} passHref>
-                          <article className='min-h-[320px] min-w-[300px] relative m-4 bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
+                          <article className='min-h-[450px] w-full m-2 relative bg-slate-50 overflow-hidden rounded-lg transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-300 hover:cursor-pointer'>
                             <figure>
                               <img
                                 src={event.photos[0].photo}
                                 alt={event.name}
-                                className='w-full h-[120px] object-cover object-center'
+                                className='w-full h-[200px] object-cover object-center'
                               />
                             </figure>
                             <section className='mt-4 px-3 text-gray-700'>
@@ -195,17 +181,21 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
                                 {dateFormatter(new Date(event.timings[0].date))}
                               </p>
                               <div className='text-sm'>
-                                <p>
+                                <p className='capitalize'>
                                   {event.city}, {event.state}, {event.country}
                                 </p>
-                                <p>
-                                  {isFreeEvent(event.prices[0].price)
-                                    ? 'Free'
-                                    : `${event.prices[0].currency} ${event.prices[0].price}`}
-                                </p>
+                                <div className='mt-2'>
+                                  {isFreeEvent(event.prices[0].price) ? (
+                                    <div>Free</div>
+                                  ) : (
+                                    <div className='uppercase'>
+                                      {`${event.prices[0].currency} ${event.prices[0].price}`}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </section>
-                            <footer className='px-3 mb-3 absolute bottom-2'>
+                            <footer className='px-3 absolute bottom-3'>
                               <h3>{event.organization.name}</h3>
                             </footer>
                           </article>
@@ -216,7 +206,7 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
               })}
             </>
           ) : (
-            <>No events</>
+            <div className='fade-in'>No events</div>
           )}
         </div>
 
@@ -228,7 +218,7 @@ const Home: NextPage<THomeProps> & TPageLayout = ({ events }) => {
           </Link>
         </div>
       </main>
-    </>
+    </div>
   );
 };
 

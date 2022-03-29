@@ -3,6 +3,7 @@ import {
   BookingDetail,
   BookingDetail_bookingById
 } from '@/services/bookingService/__generated__/BookingDetail';
+import { EventReview } from 'components/eventReview';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
 import { MonthEnum } from 'enums/monthEnum';
@@ -70,12 +71,13 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({
                 </div>
 
                 <div className='mt-5 text-slate-600 text-sm'>
-                  <p>Status {bookingItem.status}</p>
+                  <p className='capitalize'>Status {bookingItem.status}</p>
                   <p>
-                    Booked {qty} of price {price.currency} {price.price}
+                    Booked {qty} of price {price.currency.toUpperCase()}{' '}
+                    {price.price}
                   </p>
                   <p className='font-semibold'>
-                    Paid {price.currency} {price.price * qty}
+                    Paid {price.currency.toUpperCase()} {price.price * qty}
                   </p>
                 </div>
               </section>
@@ -135,7 +137,7 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({
 
                 <section className='text-slate-900 mt-4'>
                   <h2 className='font-semibold'>Location</h2>
-                  <div className='leading-5 mt-2'>
+                  <div className='leading-5 mt-2 capitalize'>
                     <p>{event.venue}</p>
                     <p>
                       {event.city}, {event.state}
@@ -148,8 +150,8 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({
 
           {/* 4th row Tags container */}
           <div className='w-full px-12 py-5 border-b-2'>
-            <h2 className='text-slate-900 font-semibold mb-2'>Tags</h2>
-            <p className='inline-block px-2 border-2 border-slate-400 rounded-2xl'>
+            <h2 className='text-slate-900 font-semibold mb-2'>Category</h2>
+            <p className='inline-block px-2 border-2 border-slate-400 rounded-2xl align-middle capitalize'>
               {event.category}
             </p>
           </div>
@@ -176,6 +178,10 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({
                 </button>
               </div>
             </section>
+          </div>
+
+          <div>
+            <EventReview eventId={event.id} />
           </div>
         </div>
       </div>

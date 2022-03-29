@@ -106,7 +106,7 @@ const ProtectedRoute: FC<TProtectedRoute> = ({ children, role = 'user' }) => {
 
   if (!store.auth.user && isLoading) {
     return (
-      <div className='min-h-[100vh] overflow-auto flex justify-center'>
+      <div className='min-h-[80vh] mt-[10vh] overflow-auto flex justify-center fade-out'>
         <LoadingSpinner />
       </div>
     );

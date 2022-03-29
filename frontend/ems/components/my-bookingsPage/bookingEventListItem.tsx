@@ -49,15 +49,16 @@ const BookingEventListItem: FC<TBookingEventListItemProps> = ({
               <p className='text-orange-600 font-bold my-2'>
                 {dateFormatter(new Date(timing.date))}
               </p>
-              <p className='text-slate-600 text-sm'>{`${event.city}, ${event.state}`}</p>
+              <p className='text-slate-600 text-sm capitalize'>{`${event.city}, ${event.state}, ${event.country}`}</p>
 
               <div className='mt-2 text-slate-600 text-sm'>
-                <p>Status {bookingItem.status}</p>
+                <p className='capitalize'>Status {bookingItem.status}</p>
                 <p>
-                  Booked {qty} of price {price.currency} {price.price}
+                  Booked {qty} of price {price.currency.toUpperCase()}{' '}
+                  {price.price}
                 </p>
                 <p className='font-semibold'>
-                  Paid {price.currency} {price.price * qty}
+                  Paid {price.currency.toUpperCase()} {price.price * qty}
                 </p>
               </div>
               <div className='mt-2 flex'>

@@ -1,3 +1,5 @@
+import { dateString } from 'utils/dateString';
+
 export class EventValidation {
   static async eventName(value: string): Promise<boolean> {
     if (!value.length) {
@@ -109,7 +111,61 @@ export class EventValidation {
     }
 
     if (value.length < 3) {
-      throw new Error('Currency should be at least 3 characters');
+      throw new Error('Currency should be 3 characters');
+    }
+
+    return true;
+  }
+
+  static async date(value: string): Promise<boolean> {
+    if (!value.length) {
+      throw new Error('Date is required');
+    }
+
+    const currDate = dateString(new Date());
+    if (new Date(currDate) >= new Date(value)) {
+      throw new Error(
+        `Date should be in future and not today's date nor the past`
+      );
+    }
+
+    return true;
+  }
+
+  static async startTime(value: string): Promise<boolean> {
+    if (!value.length) {
+      throw new Error('Start Time is required');
+    }
+
+    return true;
+  }
+
+  static async endTime(value: string): Promise<boolean> {
+    if (!value.length) {
+      throw new Error('End Time is required');
+    }
+
+    return true;
+  }
+
+  static async timeDifference(
+    startTime: string,
+    endTime: string
+  ): Promise<boolean> {
+    if (!startTime.length) {
+      throw new Error('Start Time is required');
+    }
+    const start = startTime.split(':');
+    const end = endTime.split(':');
+
+    const totalStartMinutes = +start[0] * 60 + +start[1];
+    const totalEndMinutes = +end[0] * 60 + +end[1];
+    const timeDifference = totalEndMinutes - totalStartMinutes;
+
+    if (timeDifference < 60) {
+      throw new Error(
+        'Time difference of at least 1 hour is required between start and end time '
+      );
     }
 
     return true;

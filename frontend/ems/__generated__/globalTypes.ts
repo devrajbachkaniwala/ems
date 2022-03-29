@@ -46,6 +46,11 @@ export interface AddOrganizationInput {
   photo: string;
 }
 
+export interface AddReviewInput {
+  description: string;
+  star: number;
+}
+
 export interface UpdateEventInput {
   name?: string | null;
   description?: string | null;
@@ -75,6 +80,11 @@ export interface UpdateOrganizationInput {
   contactNo?: string | null;
   email?: string | null;
   photo?: string | null;
+}
+
+export interface UpdateReviewInput {
+  description?: string | null;
+  star?: number | null;
 }
 
 export interface UpdateUserInput {

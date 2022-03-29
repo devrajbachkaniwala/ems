@@ -4,6 +4,7 @@ import { MyEvents } from '@/services/eventService/__generated__/MyEvents';
 import { store } from 'app/stores';
 import Footer from 'components/footer';
 import Header from 'components/header';
+import LoadingSpinner from 'components/loadingSpinner';
 import MyEventList from 'components/myEventsPage/myEventLists';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
@@ -170,7 +171,11 @@ const MyEventsPage: NextPage & TPageLayout = () => {
   }, []);
 
   if (!myEvents && isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   const deleteEventById = async (eventId: string) => {

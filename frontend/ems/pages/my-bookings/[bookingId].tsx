@@ -102,7 +102,19 @@ const BookingDetail: NextPage & TPageLayout = () => {
 
     if (res) {
       console.log('success');
-      router.reload();
+      setBookingDetail((prevState) => {
+        if (!prevState) {
+          return;
+        }
+        const item = prevState?.bookingItem;
+        return {
+          ...prevState,
+          bookingItem: {
+            ...item,
+            status: 'cancel'
+          }
+        };
+      });
     }
   };
 

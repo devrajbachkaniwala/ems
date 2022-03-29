@@ -5,6 +5,7 @@ import { store } from 'app/stores';
 import AddEditEvent from 'components/addEditEvent';
 import Footer from 'components/footer';
 import Header from 'components/header';
+import LoadingSpinner from 'components/loadingSpinner';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
@@ -40,7 +41,11 @@ const EditEvent: NextPage & TPageLayout = () => {
   }, [eventId, router]);
 
   if (!event && isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

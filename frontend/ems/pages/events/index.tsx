@@ -52,7 +52,9 @@ const Events: NextPage<TEventsProps> & TPageLayout = ({ events }) => {
       {searchedEvents?.length ? (
         <EventLists events={searchedEvents} />
       ) : (
-        <div className='text-center text-slate-700 font-medium'>No Events</div>
+        <div className='text-center text-slate-700 font-medium fade-in'>
+          No Events
+        </div>
       )}
     </div>
   );

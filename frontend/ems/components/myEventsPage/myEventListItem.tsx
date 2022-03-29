@@ -49,13 +49,13 @@ const MyEventListItem: FC<TMyEventListItemProps> = ({
               <p className='text-orange-600 font-bold my-2'>
                 {dateFormatter(new Date(timings[0].date))}
               </p>
-              <p className='text-slate-600 text-sm'>{`${myEvent.city}, ${myEvent.state}`}</p>
+              <p className='text-slate-600 text-sm capitalize'>{`${myEvent.city}, ${myEvent.state}, ${myEvent.country}`}</p>
 
               <div className='mt-2 text-slate-600 text-sm'>
                 <p>
                   {isFreeEvent(prices[0].price)
                     ? 'Free'
-                    : `${prices[0].currency} ${prices[0].price}`}
+                    : `${prices[0].currency.toUpperCase()} ${prices[0].price}`}
                 </p>
               </div>
               <div className='mt-2 flex'>

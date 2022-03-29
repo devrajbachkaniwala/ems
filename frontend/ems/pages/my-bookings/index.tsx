@@ -3,6 +3,7 @@ import bookingService from '@/services/bookingService';
 import { GetUserBookings } from '@/services/bookingService/__generated__/GetUserBookings';
 import Footer from 'components/footer';
 import Header from 'components/header';
+import LoadingSpinner from 'components/loadingSpinner';
 import BookingEventLists from 'components/my-bookingsPage/bookingEventLists';
 import { ProtectedRoute } from 'components/protectedRoute';
 import { GetServerSideProps, NextPage } from 'next';
@@ -252,7 +253,11 @@ const MyBookings: NextPage & TPageLayout = () => {
     }); */
 
   if (!myBookings && isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='min-h-[80vh] overflow-auto flex justify-center fade-in-out'>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   const cancelBooking = async (bookingId: string) => {
@@ -260,8 +265,21 @@ const MyBookings: NextPage & TPageLayout = () => {
 
     if (res) {
       console.log('success');
-      const bookings = await bookingService.getUserBookings();
-      setmyBookings(bookings);
+      setmyBookings((prevState) => {
+        return prevState?.map((booking) => {
+          if (booking.id === bookingId) {
+            const item = booking.bookingItem;
+            return {
+              ...booking,
+              bookingItem: {
+                ...item,
+                status: 'cancel'
+              }
+            };
+          }
+          return booking;
+        });
+      });
     }
   };
 

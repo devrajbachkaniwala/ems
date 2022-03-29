@@ -3,6 +3,7 @@ import authService from '@/services/authService';
 import bookingService from '@/services/bookingService';
 import { EventDetail } from '@/services/eventService/__generated__/EventDetail';
 import { store } from 'app/stores';
+import { EventReview } from 'components/eventReview';
 import Modal from 'components/modal';
 import OrganizationContactPopUp from 'components/organizationContactPopUp';
 import { MonthEnum } from 'enums/monthEnum';
@@ -107,9 +108,13 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                       </div>
 
                       <div className='mt-5 text-slate-800'>
-                        {isFreeEvent(prices[selectedPrice].price)
-                          ? 'Free'
-                          : `${prices[selectedPrice].currency} ${prices[selectedPrice].price}`}
+                        {isFreeEvent(prices[selectedPrice]?.price) ? (
+                          'Free'
+                        ) : (
+                          <div className='uppercase'>
+                            {`${prices[selectedPrice].currency} ${prices[selectedPrice].price}`}
+                          </div>
+                        )}
                       </div>
                     </section>
                   </div>
@@ -165,6 +170,9 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                           name='selectDate'
                           className='border-2 border-slate-300 bg-slate-50 py-3 px-2 w-full hover:cursor-pointer focus:border-blue-600 text-slate-900'
                           onChange={(e) => {
+                            if (+e.target.value < 0) {
+                              return;
+                            }
                             setSelectedTiming(+e.target.value);
                           }}
                           defaultValue='-1'
@@ -186,6 +194,9 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                           name='selectPrice'
                           className='border-2 border-slate-300 bg-slate-50 py-3 px-2 w-full hover:cursor-pointer focus:border-blue-600 text-slate-900'
                           onChange={(e) => {
+                            if (+e.target.value < 0) {
+                              return;
+                            }
                             setSelectedPrice(+e.target.value);
                           }}
                           ref={optPriceRef}
@@ -198,7 +209,9 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                             <option key={price.id} value={idx}>
                               {isFreeEvent(price.price)
                                 ? 'Free'
-                                : `${price.currency} ${price.price}`}
+                                : `${price.currency.toUpperCase()} ${
+                                    price.price
+                                  }`}
                             </option>
                           ))}
                         </select>
@@ -206,7 +219,7 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
 
                       <section className='text-slate-900'>
                         <h2 className='font-semibold'>Location</h2>
-                        <div className='leading-5 mt-2'>
+                        <div className='leading-5 mt-2 capitalize'>
                           <p>{event.venue}</p>
                           <p>
                             {event.city}, {event.state}
@@ -220,8 +233,10 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
 
                 {/* 4th row Tags container */}
                 <div className='w-full px-12 py-5 border-b-2'>
-                  <h2 className='text-slate-900 font-semibold mb-2'>Tags</h2>
-                  <p className='inline-block px-2 border-2 border-slate-400 rounded-2xl'>
+                  <h2 className='text-slate-900 font-semibold mb-2'>
+                    Category
+                  </h2>
+                  <p className='inline-block px-2 align-middle border-2 border-slate-400 rounded-2xl capitalize'>
                     {event.category}
                   </p>
                 </div>
@@ -248,6 +263,10 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                       </button>
                     </div>
                   </section>
+                </div>
+
+                <div>
+                  <EventReview eventId={event.id} />
                 </div>
               </div>
             </div>
@@ -286,7 +305,9 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                             <option key={price.id} value={idx}>
                               {isFreeEvent(price.price)
                                 ? 'Free'
-                                : `${price.currency} ${price.price}`}
+                                : `${price.currency.toUpperCase()} ${
+                                    price.price
+                                  }`}
                             </option>
                           ))}
                         </select>
@@ -334,7 +355,10 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                         </div>
                         <div className='flex'>
                           <p className='flex-grow'>Total</p>
-                          <p>INR {prices[selectedPrice].price * selectedQty}</p>
+                          <p>
+                            {prices[selectedPrice].currency.toUpperCase()}{' '}
+                            {prices[selectedPrice].price * selectedQty}
+                          </p>
                         </div>
                       </section>
                       <div className='flex flex-col justify-center items-center'>
@@ -349,7 +373,7 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                     </div>
                     <MdClose
                       onClick={() => setShowRegisterModal(false)}
-                      className='absolute text-lg text-slate-700 top-0 right-0 hover:cursor-pointer'
+                      className='absolute text-lg top-0 right-0 hover:cursor-pointer text-white'
                     />
                   </div>
                 </div>
