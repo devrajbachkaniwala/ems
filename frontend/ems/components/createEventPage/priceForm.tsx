@@ -1,4 +1,4 @@
-import { TPrice } from 'pages/organization/create-event';
+//import { TPrice } from 'pages/organization/create-event';
 import {
   ChangeEvent,
   Dispatch,
@@ -22,16 +22,16 @@ const initialFormState: TFormState = {
   maxLimit: 0
 }; */
 
-type TPriceFormProps = {
+/* type TPriceFormProps = {
   price: TPrice;
   id: number;
   setPrice: Dispatch<SetStateAction<TPrice[]>>;
-};
+}; */
 
-const PriceForm: FC<TPriceFormProps> = ({ price, id, setPrice }) => {
+const PriceForm: FC = (props) => {
   //const [formValues, setFormValues] = useState<TPriceValues>(price.values);
   //const [formErrors, setFormErrors] = useState<TPriceErrors>(price.errors);
-
+  /* 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPrice((prevState) => {
       return prevState.map((price, index) => {
@@ -45,7 +45,7 @@ const PriceForm: FC<TPriceFormProps> = ({ price, id, setPrice }) => {
         return price;
       });
     });
-  };
+  }; */
 
   const validate = () => {};
 
@@ -60,7 +60,12 @@ const PriceForm: FC<TPriceFormProps> = ({ price, id, setPrice }) => {
           <span className='text-red-600 text-lg'>{formErrors.price}</span>
         )} */}
         <label htmlFor='price'>Price</label>
-        <input type='text' name='price' id='price' onChange={handleChange} />
+        <input
+          type='text'
+          name='price'
+          id='price'
+          onChange={() => console.log('change')}
+        />
       </div>
       <div>
         <label htmlFor='currency'>Currency</label>
@@ -68,7 +73,7 @@ const PriceForm: FC<TPriceFormProps> = ({ price, id, setPrice }) => {
           type='text'
           name='currency'
           id='currency'
-          onChange={handleChange}
+          onChange={() => console.log('change')}
         />
       </div>
       <div>
@@ -77,7 +82,7 @@ const PriceForm: FC<TPriceFormProps> = ({ price, id, setPrice }) => {
           type='text'
           name='maxLimit'
           id='maxLimit'
-          onChange={handleChange}
+          onChange={() => console.log('change')}
         />
       </div>
       <button

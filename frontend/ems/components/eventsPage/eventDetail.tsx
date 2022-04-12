@@ -80,7 +80,11 @@ const EventDetail: FC<TEventDetailProps> = ({ event }) => {
                 <div className='flex flex-col lg:flex-row flex-wrap'>
                   {/* Left side Img container */}
                   <div className='w-full lg:w-4/6 h-3/4 object-cover overflow-hidden'>
-                    <img src={photos[0].photo} alt={event.name} />
+                    <img
+                      src={photos[0].photo}
+                      alt={event.name}
+                      className='object-cover w-full h-[400px]'
+                    />
                   </div>
                   {/* Right side Event name container */}
                   <div className='w-full lg:w-2/6 bg-gray-100'>

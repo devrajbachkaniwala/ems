@@ -1,13 +1,13 @@
 import eventService from '@/services/eventService';
 import {
-  EventsList,
-  EventsList_events
-} from '@/services/eventService/__generated__/EventsList';
+  EventList,
+  EventList_events
+} from '@/services/eventService/__generated__/EventList';
 import { AsyncThunk, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 type TInitialState = {
   loading: boolean;
-  data: EventsList['events'];
+  data: EventList['events'];
   error: string | null;
 };
 
@@ -17,7 +17,7 @@ const initialState: TInitialState = {
   error: null
 };
 
-export const getAllEvents: AsyncThunk<EventsList_events[], void, {}> =
+export const getAllEvents: AsyncThunk<EventList_events[], void, {}> =
   createAsyncThunk('event/getAllEvents', async (_, thunkApi) => {
     try {
       return await eventService.getAllEvents();

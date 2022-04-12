@@ -44,7 +44,11 @@ const BookedEventDetail: FC<TBookedEventDetail> = ({
             {/* Left side Img container */}
             <div className='w-full lg:w-4/6 h-3/4 object-cover overflow-hidden'>
               {event.photos?.length ? (
-                <img src={event.photos[0].photo} alt={event.name} />
+                <img
+                  src={event.photos[0].photo}
+                  alt={event.name}
+                  className='object-cover w-full h-[400px]'
+                />
               ) : (
                 <div>No image</div>
               )}

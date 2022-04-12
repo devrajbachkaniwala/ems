@@ -42,7 +42,7 @@ const BookingEventListItem: FC<TBookingEventListItemProps> = ({
       {event && bookingItem && event.photos?.length ? (
         /* Event item container */
         //<Link href={`/events/${event.id}`} passHref>
-        <article className='flex flex-col flex-wrap my-6 max-w-[720px] bg-slate-100 rounded-md overflow-hidden hover:shadow-lg transition duration-200 ease-linear'>
+        <article className='flex flex-col flex-wrap my-6 max-w-[720px] h-fit bg-slate-100 rounded-md overflow-hidden hover:shadow-lg transition duration-200 ease-linear'>
           <div className='flex flex-col-reverse md:flex-row'>
             <div className='px-4 py-3 w-full md:w-[60%]'>
               <h2 className='text-lg text-slate-800 font-bold'>{event.name}</h2>
@@ -82,7 +82,7 @@ const BookingEventListItem: FC<TBookingEventListItemProps> = ({
                 </Link>
               </div>
             </div>
-            <div className='w-full md:w-[40%]'>
+            <div className='w-full max-h-[200px] md:w-[40%]'>
               <img
                 src={event.photos[0].photo}
                 alt={event.name}

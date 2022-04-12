@@ -305,7 +305,7 @@ const MyBookings: NextPage & TPageLayout = () => {
           </section>
         </article>
       ) : (
-        <div>No Bookings</div>
+        <div className='text-center mt-2'>No Bookings</div>
       )}
     </div>
   );

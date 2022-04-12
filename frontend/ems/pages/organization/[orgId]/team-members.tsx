@@ -203,11 +203,15 @@ const TeamMembers: NextPage & TPageLayout = () => {
                     className='flex items-center p-2 my-2 justify-between w-full xl:w-[70%] border-b-2 border-slate-400 rounded-md hover:shadow-md hover:shadow-slate-400 transition duration-200 ease-linear fade-in'
                   >
                     <div className='w-[20%] flex justify-center items-center'>
-                      <img
-                        src={teamMember.user?.userPhoto ?? ''}
-                        alt={teamMember.user?.fullName}
-                        className='h-[120px] w-[120px] rounded-full object-cover'
-                      />
+                      {teamMember.user?.userPhoto ? (
+                        <img
+                          src={teamMember.user?.userPhoto ?? ''}
+                          alt={teamMember.user?.fullName}
+                          className='h-[120px] w-[120px] rounded-full object-cover'
+                        />
+                      ) : (
+                        <div className='h-[120px] w-[120px] rounded-full bg-slate-200'></div>
+                      )}
                     </div>
                     <p className='w-[20%] text-center'>
                       {teamMember.user?.username}
@@ -220,11 +224,10 @@ const TeamMembers: NextPage & TPageLayout = () => {
                     </p>
                     <button
                       type='button'
-                      className={`w-[20%] py-1 text-red-600 border-2 rounded-md border-red-600 flex justify-center items-center transition duration-200 ease-linear ${
-                        userId && userId === teamMember.user?.id
+                      className={`w-[20%] py-1 text-red-600 border-2 rounded-md border-red-600 flex justify-center items-center transition duration-200 ease-linear ${userId && userId === teamMember.user?.id
                           ? 'cursor-not-allowed'
                           : 'hover:text-white hover:bg-red-600'
-                      }`}
+                        }`}
                       disabled={!!(userId && userId === teamMember.user?.id)}
                       onClick={() => {
                         removeTeamMember(teamMember.user?.email ?? '');

@@ -204,7 +204,7 @@ const MyEventsPage: NextPage & TPageLayout = () => {
               deleteEventById={deleteEventById}
             />
           ) : (
-            <div>No Events</div>
+            <div className='text-center mt-2'>No Events</div>
           )}
         </section>
       </article>

@@ -38,8 +38,8 @@ const UserListPage: FC = () => {
         setSearchedUsers(
           users.filter(
             (user) =>
-              user.fullName.includes(searchValue) ||
-              user.username.includes(searchValue)
+              user.fullName.toLowerCase().includes(searchValue.toLowerCase()) ||
+              user.username.toLowerCase().includes(searchValue.toLowerCase())
           )
         );
       } else {

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 4001",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 4001",
     "lint": "next lint",
     "schema:download": "npx apollo service:download --endpoint=http://localhost:3001/graphql ./app/graphql/graphql-schema.json",
     "schema:generate-watch": "npx apollo codegen:generate --localSchemaFile=./app/graphql/graphql-schema.json --target=typescript --tagName=gql --watch"
